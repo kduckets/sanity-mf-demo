@@ -307,16 +307,31 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
   Presentation tab), not on a standalone `/preview/*` browser tab — the tab
   shows the same draft content, but reordering requires Presentation Tool's
   connection back to Studio.
-- **Presentation Tool's comlink connection can be flaky when switching
-  between documents** (`[@sanity/comlink] Received no response to message
+- **Presentation Tool's comlink connection is unreliable on the second
+  document you open** (`[@sanity/comlink] Received no response to message
   'comlink/heartbeat'` in the console, "Could not connect to the preview" on
-  screen). This matches a currently-open upstream Sanity issue, not something
-  in this project's code — we're already on the latest published
-  `@sanity/visual-editing`/`sanity` versions, so there's no upgrade fix
-  available yet. The spotlight pick was moved off Sanity Live's tag-tracking
-  as a mitigation (Sanity's own report notes this failing more on "heavier"
-  pages), but if it still happens: click **"Continue anyway"** on the error
-  screen first — the preview and click-to-edit often still work past it — and
-  remember the core Act 2 demo doesn't depend on Presentation Tool at all,
-  since it runs through a standalone `/preview/*` tab and `<SanityLive/>`
-  instead.
+  screen). **Confirmed as an unresolved upstream Sanity bug, not something in
+  this project's code or hosting** —
+  [sanity-io/sanity#12353](https://github.com/sanity-io/sanity/issues/12353):
+  - Reproduces identically in local production mode (`next start`) and on a
+    real HTTPS Vercel deployment, ruling out anything localhost- or
+    dev-mode-specific.
+  - We're on the latest published `sanity`/`@sanity/visual-editing`
+    versions, so there's no upgrade fix available.
+  - Moving the spotlight pick off Sanity Live's tag-tracking
+    (`src/sanity/lib/spotlight.ts`) — a real reduction in live-tracking load,
+    which Sanity's own triage notes as a contributing factor — didn't resolve
+    it either.
+  - The issue was closed by GitHub's stale-bot after inactivity, **not by an
+    actual fix** — the only linked commit referencing it turned out to be
+    from an unrelated project, where another engineer independently hit the
+    same bug and reached the same "not fixable in application code"
+    conclusion.
+
+  Given that, this isn't worth further code-level chasing. If it happens:
+  click **"Continue anyway"** on the error screen — the preview and
+  click-to-edit often still work past it. More importantly, **the core Act 2
+  demo doesn't depend on Presentation Tool at all** — it runs through a
+  standalone `/preview/*` tab and `<SanityLive/>`, which has been reliable
+  throughout. Treat Presentation Tool's click-to-edit/drag-and-drop as a
+  bonus layer to show if it cooperates, not something to depend on live.
