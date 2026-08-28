@@ -1,5 +1,8 @@
 # Marlowe & Finch — Launch Coordination Demo
 
+- **Live:** https://sanity-mf-demo.vercel.app
+- **Repo:** https://github.com/kduckets/sanity-mf-demo
+
 A live Sanity + Next.js demo built for a Solution Engineer interview. It shows a
 fictional apparel retailer ("Marlowe & Finch") how a unified content model with
 real-time sync and publish-time validation fixes the launch-coordination problem
@@ -63,6 +66,16 @@ mid-demo, and use them to show that the same model holds up across visually
 distinct labels in the portfolio, not just one.
 
 ## 4. Run it
+
+**For the actual interview, running locally is still the plan** — no network
+dependency, no risk of a venue's wifi being the reason something breaks. The
+Vercel deployment above exists mainly to check whether Presentation Tool's
+comlink connection (see the fragile-points note near the bottom) behaves
+differently on a real HTTPS domain than it does locally; it isn't a
+replacement for the local flow. `vercel.json` pins the framework to Next.js
+explicitly — Vercel's zero-config detection didn't pick it up on its own,
+likely due to the Sanity CLI config files (`sanity.cli.ts`) sitting at the
+project root alongside the Next.js ones.
 
 **For the actual demo, use production mode:**
 
