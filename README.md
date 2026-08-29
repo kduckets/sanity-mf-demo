@@ -318,15 +318,27 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
     dev-mode-specific.
   - We're on the latest published `sanity`/`@sanity/visual-editing`
     versions, so there's no upgrade fix available.
-  - Moving the spotlight pick off Sanity Live's tag-tracking
-    (`src/sanity/lib/spotlight.ts`) — a real reduction in live-tracking load,
-    which Sanity's own triage notes as a contributing factor — didn't resolve
-    it either.
+  - Moved the spotlight pick off Sanity Live's tag-tracking
+    (`src/sanity/lib/spotlight.ts`) on the theory that live-tracking load was
+    a factor (Sanity's own triage on the upstream issue asks about page
+    "heaviness"). Didn't resolve it — and measuring the actual query
+    afterward (309ms, 3.7KB, 6 products) showed this page was never heavy to
+    begin with, so that theory doesn't hold up here. The change is harmless
+    and stays (the spotlight pick doesn't need live-tracking regardless), but
+    it isn't the fix.
   - The issue was closed by GitHub's stale-bot after inactivity, **not by an
     actual fix** — the only linked commit referencing it turned out to be
     from an unrelated project, where another engineer independently hit the
     same bug and reached the same "not fixable in application code"
     conclusion.
+  - Checked the browser Network tab during an actual failure: every request
+    completes (all 200s, largest ~200ms), no failed 4xx/5xx, and no
+    WebSocket connection at all — yet the page's total load time was 17+
+    seconds. There's nothing to fix here because there's nothing to find:
+    comlink's heartbeat is a `window.postMessage` handshake between the
+    Presentation Tool parent window and the previewed iframe, which never
+    touches the network stack — it can fail silently without leaving any
+    network-level trace.
 
   Given that, this isn't worth further code-level chasing. If it happens:
   click **"Continue anyway"** on the error screen — the preview and
