@@ -78,6 +78,41 @@ export const CAPSULE_DROPS_QUERY = defineQuery(`
   }
 `)
 
+export interface SearchDemoProduct {
+  _id: string
+  name: string
+  sku?: string
+  price?: number
+  color?: string
+  materials?: string[]
+  availableSizes?: string[]
+  image?: Image
+}
+
+// Structured, constraint-based search demo (Use Case 1/2 supplement) —
+// mirrors "blue wool sweaters under $100, size M" as real field filters
+// against the seeded catalog, contrasted on the frontend against a hardcoded
+// "similarity search" panel that deliberately gets it wrong.
+export const SEARCH_DEMO_PRODUCTS_QUERY = defineQuery(`
+  *[
+    _type == "product" &&
+    category == "sweater" &&
+    color == "blue" &&
+    "wool" in materials &&
+    defined(price) && price < 100 &&
+    "M" in availableSizes
+  ]{
+    _id,
+    name,
+    sku,
+    price,
+    color,
+    materials,
+    availableSizes,
+    image
+  }
+`)
+
 export const CAPSULE_DROP_QUERY = defineQuery(`
   *[_type == "capsuleDrop" && slug.current == $slug][0]{
     _id,

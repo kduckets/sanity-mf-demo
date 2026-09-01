@@ -1,6 +1,10 @@
+import { DocumentTextIcon } from '@sanity/icons/DocumentText'
 import { PackageIcon } from '@sanity/icons/Package'
+import { RobotIcon } from '@sanity/icons/Robot'
 import { SparklesIcon } from '@sanity/icons/Sparkles'
 import type { StructureResolver } from 'sanity/structure'
+
+import { EditorialAuditPane } from '@/sanity/components/EditorialAuditPane'
 
 export const structure: StructureResolver = (S) =>
   S.list()
@@ -14,4 +18,13 @@ export const structure: StructureResolver = (S) =>
         .title('Products')
         .icon(PackageIcon)
         .child(S.documentTypeList('product').title('Products')),
+      S.listItem()
+        .title('Editorial Articles')
+        .icon(DocumentTextIcon)
+        .child(S.documentTypeList('editorialArticle').title('Editorial Articles')),
+      S.divider(),
+      S.listItem()
+        .title('Editorial Audit')
+        .icon(RobotIcon)
+        .child(S.component(EditorialAuditPane).title('Editorial Audit')),
     ])

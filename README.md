@@ -45,13 +45,14 @@ npm install
 npm run seed
 ```
 
-`npm run seed` writes three capsule drops and sixteen products directly to your
-dataset using fixed document IDs, so it's **safe to re-run any time** — including
-right before you go on — to reset the dataset to a known-good state. Product and
-hero imagery is downloaded from Wikimedia Commons (freely licensed, no API key)
-and re-uploaded to Sanity's asset pipeline, so seeding needs outbound network
-access; the demo itself, once seeded, runs fully local. The image credits printed
-at the end of the seed script list every source.
+`npm run seed` writes three capsule drops, twenty-three products, and four
+editorial articles directly to your dataset using fixed document IDs, so it's
+**safe to re-run any time** — including right before you go on — to reset the
+dataset to a known-good state. Product and hero imagery is downloaded from
+Wikimedia Commons (freely licensed, no API key) and re-uploaded to Sanity's
+asset pipeline, so seeding needs outbound network access; the demo itself,
+once seeded, runs fully local. The image credits printed at the end of the
+seed script list every source.
 
 One of the seeded drops, **"Autumn Reverie x Wilder Row,"** has two deliberately
 not-ready products:
@@ -64,6 +65,21 @@ Dana Vela"** (Slow Fauna, the label's boho-streetwear line) — are fully ready.
 Keep either in your back pocket as a fallback if live editing goes sideways
 mid-demo, and use them to show that the same model holds up across visually
 distinct labels in the portfolio, not just one.
+
+Two more sets of seeded content power the Act 4 pieces (see below) and are
+kept fully separate from the three drops above, so re-seeding or editing them
+never touches the core Acts 1–3 flow:
+
+- **Seven `product` documents** dedicated to the structured-search demo
+  (`SD-001`–`SD-007`), with `category`/`color`/`materials`/`availableSizes`
+  populated. Only two — **Cove Blue Wool Crewneck** and **Slate Blue Lambswool
+  Sweater** — satisfy every constraint in the example query; the other five
+  each fail exactly one constraint on purpose.
+- **Four `editorialArticle` documents** — the magazine/lookbook/creator-content
+  layer Use Case 4 is about. Three each carry one deliberate gap (missing alt
+  text, a product reference to a nonexistent SKU, and stale "Coming soon" copy
+  on the already-published Golden Hour restock piece); the fourth is clean, so
+  the audit panel doesn't read as flagging everything indiscriminately.
 
 ## 4. Run it
 
@@ -122,12 +138,17 @@ CMS demo:
 - **`/drops/[slug]`** — a single capsule drop (editorial + linked products)
 - **`/about`** — brand story and a small stats strip ($650M / 6 labels / etc.)
 - **`/wholesale`** — wholesale positioning and contact
+- **`/search-demo`** — structured, constraint-based catalog search contrasted
+  against a hardcoded "similarity search" failure case (Act 4 / optionally
+  alongside Act 2 — Use Case 2's live-query point, for merchandising)
 - **`/preview/drops`** and **`/preview/drops/[slug]`** — the same pages, but
   reading unpublished draft content. A separate URL tree (not a cookie toggle
   on the same URL), so it's unambiguous in the address bar which one you're on
 - **`/studio`** — the Sanity Studio, embedded in the same app, including a
   **Presentation** tool tab that iframes the `/preview/*` pages for
-  click-to-edit and drag-and-drop reordering (see below)
+  click-to-edit and drag-and-drop reordering (see below), an **Editorial
+  Articles** document list, and an **Editorial Audit** custom pane (Act 4, for
+  editorial — see below)
 
 ## How it works
 
@@ -201,6 +222,31 @@ CMS demo:
   standing example of extending Studio's action bar for a custom step in the
   launch workflow; `onHandle` is a placeholder (a real integration would post
   to a webhook or send an email from there).
+- **Editorial content audit.** Studio → **Editorial Audit**
+  (`src/sanity/components/EditorialAuditPane.tsx`, a plain custom Structure
+  Tool pane — no iframe, no comlink, so it doesn't share Presentation Tool's
+  reliability issues) is a chat-box-styled panel over three real, deterministic
+  GROQ checks against `editorialArticle` documents: missing alt text, product
+  references that don't resolve to a live SKU, and stale promo copy. Each
+  check surfaces genuine gaps in the seeded content, lets you select which to
+  fix, and **Apply** writes a real mutation via the Studio's own Sanity
+  client — not a scripted animation. Free text in the input only matches the
+  three preset prompts (shown as chips below it); anything else surfaces an
+  honest "not wired to a live model" message rather than pretending to parse
+  it. This is deliberately reliable-over-clever: no external LLM call to fail
+  live on stage.
+- **Structured search vs. similarity search.** `/search-demo`
+  (`src/app/(site)/search-demo/page.tsx`) is a two-panel contrast for the
+  example query "blue wool sweaters under $100, size M." The left panel is a
+  **hardcoded, intentionally-wrong** result set (never queried against real
+  data — it's illustrating a failure mode). The right panel runs a real GROQ
+  query (`SEARCH_DEMO_PRODUCTS_QUERY` in `src/sanity/lib/queries.ts`) filtering
+  on actual `category`/`color`/`materials`/`price`/`availableSizes` fields
+  against a dedicated seeded catalog, returning only genuine exact matches.
+  This is Use Case 2's supplementary demo moment (live, structured queries
+  against the Content Lake vs. a batch-synced or fuzzy-matched alternative) —
+  it's listed under Act 4 below, but works just as well shown right after Act
+  2's live-sync moment, since it's the same use case.
 
 ## Demo script (Act 1 / 2 / 3)
 
@@ -251,6 +297,33 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
 2. Switch to the public storefront tab and refresh: now shows the resolved,
    in-stock, correctly-priced page — no preview mode needed anymore.
 
+### Act 4 — two more, 60 seconds each
+
+Bridge line: *"That's the launch-day story. Two more things worth 60 seconds
+each, since they map to roles in this room specifically."*
+
+**Merchandising — structured search (~1 min).** *"This one's for whoever's
+thinking about merchandising and product search."* Open `/search-demo`. Point
+at the example query, then the left panel's mismatched results — "all
+related, none matching." Point at the right panel: every result satisfies
+every constraint, because it's a real GROQ filter against the catalog, not a
+similarity guess. This is Use Case 2's supplementary moment (structured,
+live queries vs. a batch-synced or fuzzy alternative) — it reads fine here in
+Act 4, or fold it into Act 2 right after the live-sync beat if you'd rather
+land both live-query proof points back to back.
+
+**Editorial — the audit panel (~1–2 min).** *"And this one's for editorial —
+with nine writers covering fourteen drops a year, this is where that
+scales."* In Studio, open **Editorial Audit**. Click the three example
+prompts in turn — missing alt text, a broken product link, and stale promo
+copy on the Golden Hour restock piece all surface as real, staged findings.
+Check a couple of boxes and click **Apply**; the panel re-runs the check and
+the fixed items drop off the list. Open the affected article in **Editorial
+Articles** afterward if you want to show the write actually landed.
+
+Close by naming the bottom line out loud: *"Nine writers, unlimited scale."*
+Then hand off to Q&A.
+
 ## Known fragile points (and how to rehearse around them)
 
 - **Live-panel timing.** The readiness panel and storefront both update within
@@ -271,6 +344,20 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
 - **If live editing misbehaves on stage,** fall back to the pre-seeded, fully
   ready **"Golden Hour x Marlowe Studio"** drop to show the clean end state
   without live-editing anything.
+- **The similarity-search panel is intentionally fake.** It's a hardcoded
+  array in `src/app/(site)/search-demo/page.tsx`, never queried against real
+  data — don't "fix" it to be more accurate, that would undercut the contrast
+  it exists to make.
+- **The audit panel is preset-prompts-only by design, for this pass** — not a
+  placeholder waiting on a live LLM call. Free text stays visually typeable
+  (so the box doesn't look fake) but only matches the three preset prompts
+  exactly (case-insensitive); anything else shows an honest "not wired to a
+  live model" message, not an error. This keeps the panel's reliability
+  independent of any external API on stage. Revisit wiring up a real model
+  call in a later pass if there's appetite for it.
+- **Applying an audit fix is a real, one-way mutation.** Re-running
+  `npm run seed` resets the four editorial articles back to their seeded gaps
+  if you want to demo the same check twice in rehearsal.
 - **Resetting mid-rehearsal.** If anything gets into a weird state, `npm run
   seed` puts both drops back to their scripted starting state in a few
   seconds.

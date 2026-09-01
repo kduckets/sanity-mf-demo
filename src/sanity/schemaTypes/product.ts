@@ -1,5 +1,5 @@
 import { PackageIcon } from '@sanity/icons/Package'
-import { defineField, defineType } from 'sanity'
+import { defineArrayMember, defineField, defineType } from 'sanity'
 
 export const product = defineType({
   name: 'product',
@@ -62,6 +62,51 @@ export const product = defineType({
       title: 'Product image',
       type: 'image',
       options: { hotspot: true },
+    }),
+    defineField({
+      name: 'category',
+      title: 'Category',
+      type: 'string',
+      description: 'Structured catalog field used by the constraint-based search demo.',
+      options: {
+        list: [
+          'sweater',
+          'coat',
+          'jacket',
+          'dress',
+          'trouser',
+          'tee',
+          'hoodie',
+          'scarf',
+          'boots',
+          'mules',
+          'vest',
+          'hat',
+          'tote',
+          'mug',
+        ],
+      },
+    }),
+    defineField({
+      name: 'color',
+      title: 'Color',
+      type: 'string',
+      description: 'Structured catalog field used by the constraint-based search demo.',
+    }),
+    defineField({
+      name: 'materials',
+      title: 'Materials',
+      type: 'array',
+      of: [defineArrayMember({ type: 'string' })],
+      description: 'Structured catalog field used by the constraint-based search demo.',
+    }),
+    defineField({
+      name: 'availableSizes',
+      title: 'Available sizes',
+      type: 'array',
+      of: [defineArrayMember({ type: 'string' })],
+      description:
+        'Sizes currently in stock — used by the constraint-based search demo to prove size/stock filtering.',
     }),
   ],
   preview: {

@@ -231,6 +231,152 @@ const products = [
   },
 ];
 
+// Dedicated catalog for the structured-search demo (Use Case 1/2 supplement)
+// — kept out of `products` above and out of every capsule drop's product
+// list, so it never touches the Acts 1–3 flow. Two exact matches for "blue
+// wool sweaters under $100, size M"; the rest each fail exactly one
+// constraint, to make the contrast with the fake similarity panel legible.
+// Non-matches skip `image` — they're never rendered, only queried.
+const searchDemoProducts = [
+  {
+    _id: "product-search-demo-001",
+    name: "Cove Blue Wool Crewneck",
+    sku: "SD-001",
+    price: 88,
+    availabilityStatus: "in_stock",
+    category: "sweater",
+    color: "blue",
+    materials: ["wool"],
+    availableSizes: ["S", "M", "L"],
+    image: WM("c/c4/Oceans_and_trees_Fair_Isle_pullover.jpg/1280px-Oceans_and_trees_Fair_Isle_pullover.jpg"),
+  },
+  {
+    _id: "product-search-demo-002",
+    name: "Slate Blue Lambswool Sweater",
+    sku: "SD-002",
+    price: 96,
+    availabilityStatus: "in_stock",
+    category: "sweater",
+    color: "blue",
+    materials: ["wool", "lambswool"],
+    availableSizes: ["M", "L"],
+    image: WM("c/c4/Oceans_and_trees_Fair_Isle_pullover.jpg/1280px-Oceans_and_trees_Fair_Isle_pullover.jpg"),
+  },
+  {
+    _id: "product-search-demo-003",
+    name: "Cove Blue Cotton Crewneck",
+    sku: "SD-003",
+    // Fails the material constraint (cotton, not wool).
+    price: 74,
+    availabilityStatus: "in_stock",
+    category: "sweater",
+    color: "blue",
+    materials: ["cotton"],
+    availableSizes: ["S", "M", "L"],
+  },
+  {
+    _id: "product-search-demo-004",
+    name: "Amber Wool Crewneck",
+    sku: "SD-004",
+    // Fails the color constraint (amber, not blue).
+    price: 92,
+    availabilityStatus: "in_stock",
+    category: "sweater",
+    color: "amber",
+    materials: ["wool"],
+    availableSizes: ["M"],
+  },
+  {
+    _id: "product-search-demo-005",
+    name: "Cove Blue Wool Sweater",
+    sku: "SD-005",
+    // Fails the price constraint (over $100).
+    price: 128,
+    availabilityStatus: "in_stock",
+    category: "sweater",
+    color: "blue",
+    materials: ["wool"],
+    availableSizes: ["M"],
+  },
+  {
+    _id: "product-search-demo-006",
+    name: "Cove Blue Wool Pullover",
+    sku: "SD-006",
+    // Fails the size/stock constraint (no M in stock).
+    price: 84,
+    availabilityStatus: "in_stock",
+    category: "sweater",
+    color: "blue",
+    materials: ["wool"],
+    availableSizes: ["S", "L"],
+  },
+  {
+    _id: "product-search-demo-007",
+    name: "Cove Blue Wool Scarf",
+    sku: "SD-007",
+    // Fails the category constraint (scarf, not sweater).
+    price: 68,
+    availabilityStatus: "in_stock",
+    category: "scarf",
+    color: "blue",
+    materials: ["wool"],
+    availableSizes: [],
+  },
+];
+
+// Editorial/magazine content (Use Case 4) — deliberately separate from the
+// three capsule drops' own `editorialStory` field. Each article carries at
+// most one intentional gap for the audit panel to find; one is left clean as
+// a control so the audit doesn't read as flagging everything indiscriminately.
+const editorialArticles = [
+  {
+    _id: "editorial-article-fall-layering",
+    title: "Reading the Room: A Fall Layering Guide",
+    slug: "fall-layering-guide",
+    kind: "Magazine",
+    dek: "Three ways to layer this season's key pieces, from studio to street.",
+    coverImage: WM("7/71/Forest_path_through_yellow_autumn_leaves_in_Tuntorp_1.jpg/1280px-Forest_path_through_yellow_autumn_leaves_in_Tuntorp_1.jpg"),
+    // Deliberately no alt text — the "missing alt text" audit gap.
+  },
+  {
+    _id: "editorial-article-wilder-row-visit",
+    title: "Wilder Row Studio Visit",
+    slug: "wilder-row-studio-visit",
+    kind: "Creator content",
+    dek: "A morning in the studio where Autumn Reverie started as a sketch on a gig poster.",
+    coverImage: WM("7/71/Forest_path_through_yellow_autumn_leaves_in_Tuntorp_1.jpg/1280px-Forest_path_through_yellow_autumn_leaves_in_Tuntorp_1.jpg"),
+    coverImageAlt: "Wilder Row's studio workspace",
+    // Points at a product id that doesn't exist — the "broken product link" gap.
+    relatedProductId: "product-av-wr-999",
+  },
+  {
+    _id: "editorial-article-golden-hour-restock",
+    title: "Golden Hour Restock",
+    slug: "golden-hour-restock",
+    kind: "Magazine",
+    dek: "Everything from the Golden Hour capsule, back in stock for one more pass through the light.",
+    coverImage: WM("a/ad/That_Golden_Hour_Light_%2814871942828%29.jpg/1280px-That_Golden_Hour_Light_%2814871942828%29.jpg"),
+    coverImageAlt: "Golden hour light through trees",
+    relatedDropId: "capsule-drop-golden-hour",
+    // Golden Hour is fully published and ready — this copy just never got
+    // updated. The "stale promo copy" gap.
+    promoCopy: "Coming soon — details TBD",
+  },
+  {
+    _id: "editorial-article-slow-fauna-zine",
+    title: "Slow Fauna Zine, Issue No. 1",
+    slug: "slow-fauna-zine-issue-1",
+    kind: "Lookbook",
+    dek: "Behind the hand-tied dye lots of the Peaceable Kingdom capsule.",
+    coverImage: WM("6/69/Desert_Sky%2C_Joshua_Tree_NP_4-13_%2831141402630%29.jpg/1280px-Desert_Sky%2C_Joshua_Tree_NP_4-13_%2831141402630%29.jpg"),
+    coverImageAlt: "Desert sky over Joshua Tree",
+    relatedDropId: "capsule-drop-slow-fauna",
+    relatedProductId: "product-sf-dv-006",
+    promoCopy: "Now live — shop the drop.",
+    // No gaps — control case, proves the audit doesn't flag everything.
+  },
+];
+
 const drops = [
   {
     _id: "capsule-drop-autumn-reverie",
@@ -329,15 +475,9 @@ async function discardDraft(id) {
   await client.delete(`drafts.${id}`);
 }
 
-async function seedProducts() {
-  console.log(`Seeding ${products.length} products...`);
-  for (const product of products) {
-    const image = await uploadImageFromUrl(
-      product._id,
-      product.image,
-      `${product.sku}.jpg`,
-    );
-
+async function seedProducts(list) {
+  console.log(`Seeding ${list.length} products...`);
+  for (const product of list) {
     const doc = {
       _id: product._id,
       _type: "product",
@@ -345,14 +485,66 @@ async function seedProducts() {
       sku: product.sku,
       availabilityStatus: product.availabilityStatus,
       lastSyncedAt: new Date().toISOString(),
-      image: imageField(image),
     };
+    // Search-demo non-matches skip an image — they're only ever queried, never rendered.
+    if (product.image) {
+      const image = await uploadImageFromUrl(product._id, product.image, `${product.sku}.jpg`);
+      doc.image = imageField(image);
+    }
     if (product.price !== undefined) doc.price = product.price;
     if (product.previousPrice !== undefined) doc.previousPrice = product.previousPrice;
+    if (product.category !== undefined) doc.category = product.category;
+    if (product.color !== undefined) doc.color = product.color;
+    if (product.materials !== undefined) doc.materials = product.materials;
+    if (product.availableSizes !== undefined) doc.availableSizes = product.availableSizes;
 
     await discardDraft(product._id);
     await client.createOrReplace(doc);
     console.log(`  ✓ ${product.name} (${product.sku})`);
+  }
+}
+
+async function seedEditorialArticles() {
+  console.log(`\nSeeding ${editorialArticles.length} editorial article(s)...`);
+  for (const article of editorialArticles) {
+    const coverImage = await uploadImageFromUrl(
+      `${article._id}-cover`,
+      article.coverImage,
+      `${article.slug}-cover.jpg`,
+    );
+
+    const coverImageField = imageField(coverImage);
+    if (article.coverImageAlt) coverImageField.alt = article.coverImageAlt;
+
+    const doc = {
+      _id: article._id,
+      _type: "editorialArticle",
+      title: article.title,
+      slug: { _type: "slug", current: article.slug },
+      kind: article.kind,
+      dek: article.dek,
+      coverImage: coverImageField,
+      needsReview: false,
+    };
+    if (article.promoCopy !== undefined) doc.promoCopy = article.promoCopy;
+    if (article.relatedDropId) {
+      doc.relatedDrop = { _type: "reference", _ref: article.relatedDropId };
+    }
+    if (article.relatedProductId) {
+      // Weak, matching the schema field — lets this point at a nonexistent
+      // product without Sanity's referential-integrity check rejecting the
+      // write (a real stale link behaves the same way once its target is
+      // renamed or removed).
+      doc.relatedProduct = {
+        _type: "reference",
+        _ref: article.relatedProductId,
+        _weak: true,
+      };
+    }
+
+    await discardDraft(article._id);
+    await client.createOrReplace(doc);
+    console.log(`  ✓ ${article.title}`);
   }
 }
 
@@ -386,13 +578,23 @@ async function seedDrops() {
 }
 
 try {
-  await seedProducts();
+  await seedProducts([...products, ...searchDemoProducts]);
   await seedDrops();
+  await seedEditorialArticles();
   console.log("\nDone. Two products are deliberately not-ready:");
   console.log('  - "Umber Wide-Leg Trouser" (AV-WR-005) — missing a price');
   console.log('  - "Copper Knit Vest" (AV-WR-006) — availabilityStatus: pending');
   console.log(
     "\nOpen the Autumn Reverie drop in Studio to see the readiness warning.",
+  );
+  console.log(
+    "\nThree editorial articles carry a deliberate gap for the audit panel\n" +
+      '(Studio → "Editorial Audit"): missing alt text, a broken product link,\n' +
+      "and stale promo copy on the Golden Hour restock piece. A fourth is clean.",
+  );
+  console.log(
+    '\n"Cove Blue Wool Crewneck" and "Slate Blue Lambswool Sweater" are the\n' +
+      "only exact matches for the /search-demo constraint-based query.",
   );
   console.log("\nImage sources (Wikimedia Commons, freely licensed):");
   console.log(credits.join("\n"));
