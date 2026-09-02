@@ -366,6 +366,26 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
 2. Switch to the public storefront tab and refresh: now shows the resolved,
    in-stock, correctly-priced page — no preview mode needed anymore.
 
+### Engineering detour — schema-as-code & GROQ (~1–2 min, optional)
+
+For the engineers in the room specifically, right where their attention is
+already highest. *"Since none of what you just watched is a proprietary
+GUI — quick look at what's actually driving it."* Switch to your editor:
+
+- **Schema-as-code:** open `src/sanity/schemaTypes/product.ts` and
+  `capsuleDrop.ts` — the whole content model, including the readiness
+  validation rule that just blocked Publish, is plain version-controlled
+  TypeScript (`defineType`/`defineField`), not config buried in a GUI.
+- **GROQ:** open `src/sanity/lib/queries.ts` and show `CAPSULE_DROP_QUERY` —
+  one query dereferencing the drop's editorial story and every linked
+  product's live price/availability in a single round trip. Or run
+  something live in Studio's **Vision** tab (already in the nav) — e.g.
+  `*[_type == "product" && availabilityStatus == "sold_out"]` — a plain
+  filter against real content, no query builder, no separate API per field.
+
+No fixed script here — you know this codebase, drive it live. Keep it
+tight; it's a detour, not a new act.
+
 ### Act 4 — two more, 60 seconds each
 
 Bridge line: *"That's the launch-day story. Two more things worth 60 seconds
