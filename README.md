@@ -296,7 +296,11 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
 
 1. In Studio, open **Capsule Drops → Autumn Reverie x Wilder Row**. Point out
    that the editorial story and the six linked products live in the same
-   document — no separate CMS, no separate PIM.
+   document — no separate CMS, no separate marketing-pages system. *(The PIM
+   still exists as the real system of record for price and availability —
+   the point isn't that it goes away, it's that its data now lands here
+   automatically instead of three teams re-entering it into WordPress,
+   Contentful, and a PIM export by hand.)*
 2. Switch to the public storefront tab. Show the drop page rendering the story
    and product list together, on a site that looks like the rest of
    marloweandfinch.com — this is the customer-facing result of that one
