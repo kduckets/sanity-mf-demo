@@ -262,6 +262,13 @@ CMS demo:
   standing example of extending Studio's action bar for a custom step in the
   launch workflow; `onHandle` is a placeholder (a real integration would post
   to a webhook or send an email from there).
+- **Tasks (native Studio feature, no code).** The checkmark icon in Studio's
+  top-right navbar opens Sanity's built-in Tasks inbox — attach a task to
+  any document, assign it to a teammate with a due date, they get a
+  notification email. Nothing to build here; it's stock Studio. Used in Act
+  2 to show the readiness block isn't just a red error — it's a real
+  coordination point that doesn't have to route through whoever's driving
+  the demo.
 - **Content Agent.** Studio → **Content Agent**
   (`src/sanity/components/EditorialAuditPane.tsx`, a plain custom Structure
   Tool pane — no iframe, no comlink, so it doesn't share Presentation Tool's
@@ -339,6 +346,16 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
    Vest" is marked "pending."*
 2. Try to **Publish**. Studio blocks it and shows the same two validation
    errors, pointing at the `products` field.
+2a. **Optional aside — coordination, not just validation.** Instead of
+   fixing it yourself, show the other real option: open **Copper Knit
+   Vest**, click the checkmark icon in the top-right navbar (**Tasks**),
+   create a new task — title it something like *"Confirm price before
+   Autumn Reverie launches,"* set a due date, assign it to a teammate. They'd
+   get a notification email; you'd see it land in your Tasks inbox attached
+   to that exact document. This is the "governed by the same conductor" line
+   from the deck made concrete — the fix doesn't have to be you. Then
+   continue the script by fixing it yourself anyway (no assignee in the
+   room to wait on).
 3. Open **Products → Copper Knit Vest** (in the same tab, or a third tab).
    Change **Availability status** from `Pending` to `In stock` and let it
    autosave. *(If asked: in production this same field-level change arrives
