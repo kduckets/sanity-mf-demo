@@ -138,9 +138,10 @@ CMS demo:
 - **`/drops/[slug]`** — a single capsule drop (editorial + linked products)
 - **`/about`** — brand story and a small stats strip ($650M / 6 labels / etc.)
 - **`/wholesale`** — wholesale positioning and contact
-- **`/search-demo`** — structured, constraint-based catalog search contrasted
-  against a hardcoded "similarity search" failure case (Act 4 / optionally
-  alongside Act 2 — Use Case 2's live-query point, for merchandising)
+- **`/search-demo`** — editable, real Content Agent extraction turned into a
+  live GROQ filter, contrasted against a hardcoded "similarity search"
+  failure case (Act 4 / optionally alongside Act 2 — Use Case 2's live-query
+  point, for merchandising)
 - **`/preview/drops`** and **`/preview/drops/[slug]`** — the same pages, but
   reading unpublished draft content. A separate URL tree (not a cookie toggle
   on the same URL), so it's unambiguous in the address bar which one you're on
@@ -235,14 +236,26 @@ CMS demo:
   honest "not wired to a live model" message rather than pretending to parse
   it. This is deliberately reliable-over-clever: no external LLM call to fail
   live on stage.
-- **Structured search vs. similarity search.** `/search-demo`
-  (`src/app/(site)/search-demo/page.tsx`) is a two-panel contrast for the
-  example query "blue wool sweaters under $100, size M." The left panel is a
-  **hardcoded, intentionally-wrong** result set (never queried against real
-  data — it's illustrating a failure mode). The right panel runs a real GROQ
-  query (`SEARCH_DEMO_PRODUCTS_QUERY` in `src/sanity/lib/queries.ts`) filtering
-  on actual `category`/`color`/`materials`/`price`/`availableSizes` fields
-  against a dedicated seeded catalog, returning only genuine exact matches.
+- **Structured search vs. similarity search, via a real Content Agent call.**
+  `/search-demo` is a two-panel contrast, editable — type any request, not
+  just the example. The left panel is a **hardcoded, intentionally-wrong**
+  result set (never queried against real data — it's illustrating a failure
+  mode). The right panel sends whatever you typed to Sanity's real Content
+  Agent (`client.agent.action.prompt()`, `src/sanity/lib/agentSearch.ts`),
+  which extracts structured filters — `category`/`color`/`materials`/
+  `maxPrice`/`size` — as JSON, no vector search or similarity involved. Those
+  filters run as a real, parameterized GROQ query
+  (`FILTERED_PRODUCTS_QUERY` in the same file) against a dedicated seeded
+  catalog, so what's on screen is a genuine round trip: free text → AI-parsed
+  constraints → exact-match query. The extracted filters are shown as chips
+  ("Understood as: category: sweater, ...") so the audience sees exactly
+  what the model did and didn't infer — e.g. asking for "wool sweaters" with
+  no color/price/size correctly returns more matches with fewer chips, and
+  an off-topic request ("tell me a joke") correctly recognizes no catalog
+  constraint rather than hallucinating one. If the Agent Actions call fails
+  or times out (8s), a Server Action (`src/app/(site)/search-demo/actions.ts`)
+  falls back to the original hardcoded example query rather than erroring —
+  same reliability pattern as the editorial audit panel's preset prompts.
   This is Use Case 2's supplementary demo moment (live, structured queries
   against the Content Lake vs. a batch-synced or fuzzy-matched alternative) —
   it's listed under Act 4 below, but works just as well shown right after Act
@@ -304,13 +317,17 @@ each, since they map to roles in this room specifically."*
 
 **Merchandising — structured search (~1 min).** *"This one's for whoever's
 thinking about merchandising and product search."* Open `/search-demo`. Point
-at the example query, then the left panel's mismatched results — "all
-related, none matching." Point at the right panel: every result satisfies
-every constraint, because it's a real GROQ filter against the catalog, not a
-similarity guess. This is Use Case 2's supplementary moment (structured,
-live queries vs. a batch-synced or fuzzy alternative) — it reads fine here in
-Act 4, or fold it into Act 2 right after the live-sync beat if you'd rather
-land both live-query proof points back to back.
+at the left panel's mismatched results — "all related, none matching." Click
+**Search** on the pre-filled example: after a beat (~2s, real Content Agent
+call), the right panel shows the extracted filter chips and the exact
+matches. Optionally type a second request live — e.g. "wool sweaters" — and
+show the chips change to match only what was actually said (no color/price/
+size chip this time), then a clearly off-topic one ("tell me a joke") to show
+it recognizes no catalog constraint rather than guessing. This is Use Case
+2's supplementary moment (structured, live queries vs. a batch-synced or
+fuzzy alternative) — it reads fine here in Act 4, or fold it into Act 2 right
+after the live-sync beat if you'd rather land both live-query proof points
+back to back.
 
 **Editorial — the audit panel (~1–2 min).** *"And this one's for editorial —
 with nine writers covering fourteen drops a year, this is where that
@@ -345,9 +362,26 @@ Then hand off to Q&A.
   ready **"Golden Hour x Marlowe Studio"** drop to show the clean end state
   without live-editing anything.
 - **The similarity-search panel is intentionally fake.** It's a hardcoded
-  array in `src/app/(site)/search-demo/page.tsx`, never queried against real
-  data — don't "fix" it to be more accurate, that would undercut the contrast
-  it exists to make.
+  array in `SearchDemoClient.tsx`, never queried against real data and never
+  wired to the search box — don't "fix" it to be more accurate, that would
+  undercut the contrast it exists to make.
+- **The right panel on `/search-demo` is a real, billed Content Agent call**
+  (`client.agent.action.prompt()`, apiVersion `vX` — Agent Actions rejects any
+  other apiVersion outright), not a mock. Takes ~1.5–2.5s per search; typing
+  and hitting **Search** shows "Asking Content Agent…" during that window.
+  It consumes Sanity AI Credits on every call, including ones during
+  rehearsal. Falls back to the hardcoded example query if the call fails,
+  times out (8s), or the project's plan doesn't have AI features enabled —
+  the fallback notice says so on screen rather than pretending it succeeded.
+  **Gotcha if you ever edit the instruction text**
+  (`EXTRACTION_INSTRUCTION` in `src/sanity/lib/agentSearch.ts`): Sanity's
+  agent API treats any `$word` in the instruction as a template variable
+  needing a matching `instructionParams` key — a literal example like
+  "under $100" in the instruction text itself (not the user's query, which
+  is safely passed via `instructionParams`) will 400 with "missing
+  instructionParams" on every single call. Hit this exact bug once; avoid
+  writing a bare `$` followed by a word or digits anywhere in the
+  instruction string.
 - **The audit panel is preset-prompts-only by design, for this pass** — not a
   placeholder waiting on a live LLM call. Free text stays visually typeable
   (so the box doesn't look fake) but only matches the three preset prompts
