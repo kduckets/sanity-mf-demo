@@ -40,11 +40,9 @@ export default async function SearchDemoPage() {
           Structured search, not a guess.
         </h1>
         <p className="mt-6 max-w-2xl leading-relaxed text-foreground/90">
-          Same query, two approaches. One treats every field as a fuzzy
-          similarity signal. The other hands the sentence to a real Sanity
-          Content Agent, which turns it into structured filters — category,
-          color, material, price, size — and GROQ returns only what
-          genuinely matches.
+          One panel guesses by similarity. The other sends your words to a
+          real Content Agent, which extracts exact filters and runs them as
+          GROQ.
         </p>
 
         <SearchDemoClient initialResult={initialResult} />

@@ -49,7 +49,7 @@ export function SearchDemoClient({ initialResult }: { initialResult: SearchResul
           htmlFor="search-demo-input"
           className="mb-2 block text-xs tracking-wide text-muted uppercase"
         >
-          Search — type your own, or use the example
+          Try a search
         </label>
         <div className="flex gap-2">
           <input
@@ -71,7 +71,7 @@ export function SearchDemoClient({ initialResult }: { initialResult: SearchResul
 
       {result.usedFallback && (
         <p className="mt-3 max-w-xl rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800">
-          Content Agent didn&apos;t respond — showing the built-in example query instead.
+          Content Agent didn&apos;t respond — showing the example instead.
         </p>
       )}
 
@@ -84,9 +84,8 @@ export function SearchDemoClient({ initialResult }: { initialResult: SearchResul
             </span>
           </div>
           <p className="mt-2 text-xs text-muted">
-            Ranked by surface-level resemblance — shares a word or a vibe, not
-            the actual constraints. (Static — doesn&apos;t respond to the box
-            above; that&apos;s the point.)
+            Matches by vibe, not constraint. Never changes — that&apos;s the
+            point.
           </p>
           <ul className="mt-5 space-y-3">
             {SIMILARITY_RESULTS.map((item) => (
@@ -112,8 +111,8 @@ export function SearchDemoClient({ initialResult }: { initialResult: SearchResul
 
           {result.noFiltersRecognized ? (
             <p className="mt-2 text-xs text-muted">
-              Didn&apos;t recognize a catalog constraint in that request — try
-              mentioning a category, color, material, price, or size.
+              No catalog constraint recognized — try a category, color,
+              material, price, or size.
             </p>
           ) : chips.length > 0 ? (
             <div className="mt-2 flex flex-wrap gap-1.5">
@@ -172,9 +171,8 @@ export function SearchDemoClient({ initialResult }: { initialResult: SearchResul
       </div>
 
       <p className="mt-8 max-w-2xl text-sm text-muted">
-        Every result on the right matches every constraint — because a real
-        Content Agent call turned the sentence above into filters, and GROQ
-        ran them as a filter, not a guess.
+        Every match on the right satisfies every constraint — because
+        it&apos;s a filter, not a guess.
       </p>
     </>
   );
