@@ -66,15 +66,10 @@ Keep either in your back pocket as a fallback if live editing goes sideways
 mid-demo, and use them to show that the same model holds up across visually
 distinct labels in the portfolio, not just one.
 
-Two more sets of seeded content power the Act 4 pieces (see below) and are
-kept fully separate from the three drops above, so re-seeding or editing them
+A separate set of seeded content powers the Act 4 piece (see below) and is
+kept fully apart from the three drops above, so re-seeding or editing it
 never touches the core Acts 1–3 flow:
 
-- **Seven `product` documents** dedicated to the structured-search demo
-  (`SD-001`–`SD-007`), with `category`/`color`/`materials`/`availableSizes`
-  populated. Only two — **Cove Blue Wool Crewneck** and **Slate Blue Lambswool
-  Sweater** — satisfy every constraint in the example query; the other five
-  each fail exactly one constraint on purpose.
 - **Four `editorialArticle` documents** — the magazine/lookbook/creator-content
   layer Use Case 4 is about. Three each carry one deliberate gap (missing alt
   text, a product reference to a nonexistent SKU, and stale "Coming soon" copy
@@ -164,10 +159,6 @@ CMS demo:
 - **`/drops/[slug]`** — a single capsule drop (editorial + linked products)
 - **`/about`** — brand story and a small stats strip ($650M / 6 labels / etc.)
 - **`/wholesale`** — wholesale positioning and contact
-- **`/search-demo`** — editable, real Content Agent extraction turned into a
-  live GROQ filter, contrasted against a hardcoded "similarity search"
-  failure case (Act 4 / optionally alongside Act 2 — Use Case 2's live-query
-  point, for merchandising)
 - **`/preview/drops`** and **`/preview/drops/[slug]`** — the same pages, but
   reading unpublished draft content. A separate URL tree (not a cookie toggle
   on the same URL), so it's unambiguous in the address bar which one you're on
@@ -292,31 +283,6 @@ CMS demo:
   writing, requires a studio-connect step this embedded studio doesn't yet
   satisfy). Know the difference if asked; the underlying capability (real
   GROQ checks, real staged fixes) is genuine either way.
-- **Structured search vs. similarity search, via a real Content Agent call.**
-  `/search-demo` is a two-panel contrast, editable — type any request, not
-  just the example. The left panel is a **hardcoded, intentionally-wrong**
-  result set (never queried against real data — it's illustrating a failure
-  mode). The right panel sends whatever you typed to Sanity's real Content
-  Agent (`client.agent.action.prompt()`, `src/sanity/lib/agentSearch.ts`),
-  which extracts structured filters — `category`/`color`/`materials`/
-  `maxPrice`/`size` — as JSON, no vector search or similarity involved. Those
-  filters run as a real, parameterized GROQ query
-  (`FILTERED_PRODUCTS_QUERY` in the same file) against a dedicated seeded
-  catalog, so what's on screen is a genuine round trip: free text → AI-parsed
-  constraints → exact-match query. The extracted filters are shown as chips
-  ("Understood as: category: sweater, ...") so the audience sees exactly
-  what the model did and didn't infer — e.g. asking for "wool sweaters" with
-  no color/price/size correctly returns more matches with fewer chips, and
-  an off-topic request ("tell me a joke") correctly recognizes no catalog
-  constraint rather than hallucinating one. If the Agent Actions call fails
-  or times out (8s), a Server Action (`src/app/(site)/search-demo/actions.ts`)
-  falls back to the original hardcoded example query rather than erroring —
-  same reliability pattern as the editorial audit panel's preset prompts.
-  This is Use Case 2's supplementary demo moment (live, structured queries
-  against the Content Lake vs. a batch-synced or fuzzy-matched alternative) —
-  it's listed under Act 4 below, but works just as well shown right after Act
-  2's live-sync moment, since it's the same use case.
-
 ## Demo script (Act 1 / 2 / 3)
 
 **Before you start:** run `npm run seed`, run the app with `npm run build &&
@@ -403,24 +369,10 @@ GUI — quick look at what's actually driving it."* Switch to your editor:
 No fixed script here — you know this codebase, drive it live. Keep it
 tight; it's a detour, not a new act.
 
-### Act 4 — two more, 60 seconds each
+### Act 4 — one more, for editorial
 
-Bridge line: *"That's the launch-day story. Two more things worth 60 seconds
-each, since they map to roles in this room specifically."*
-
-**Merchandising — structured search (~1 min).** *"This one's for whoever's
-thinking about merchandising and product search."* Open `/search-demo`. Point
-at the left panel's mismatched results — "all related, none matching." Click
-**Search** on the pre-filled example: after a beat (~2s, real Content Agent
-call), the right panel shows the extracted filter chips and the exact
-matches. Optionally type a second request live — e.g. "wool sweaters" — and
-show the chips change to match only what was actually said (no color/price/
-size chip this time), then a clearly off-topic one ("tell me a joke") to show
-it recognizes no catalog constraint rather than guessing. This is Use Case
-2's supplementary moment (structured, live queries vs. a batch-synced or
-fuzzy alternative) — it reads fine here in Act 4, or fold it into Act 2 right
-after the live-sync beat if you'd rather land both live-query proof points
-back to back.
+Bridge line: *"That's the launch-day story. One more thing worth a couple
+minutes, since it maps to a specific role in this room."*
 
 **Editorial — Content Agent (~1–2 min).** *"And this one's for editorial —
 with nine writers covering fourteen drops a year, this is where that
@@ -479,27 +431,6 @@ Then hand off to Q&A.
 - **If live editing misbehaves on stage,** fall back to the pre-seeded, fully
   ready **"Golden Hour x Marlowe Studio"** drop to show the clean end state
   without live-editing anything.
-- **The similarity-search panel is intentionally fake.** It's a hardcoded
-  array in `SearchDemoClient.tsx`, never queried against real data and never
-  wired to the search box — don't "fix" it to be more accurate, that would
-  undercut the contrast it exists to make.
-- **The right panel on `/search-demo` is a real, billed Content Agent call**
-  (`client.agent.action.prompt()`, apiVersion `vX` — Agent Actions rejects any
-  other apiVersion outright), not a mock. Takes ~1.5–2.5s per search; typing
-  and hitting **Search** shows "Asking Content Agent…" during that window.
-  It consumes Sanity AI Credits on every call, including ones during
-  rehearsal. Falls back to the hardcoded example query if the call fails,
-  times out (8s), or the project's plan doesn't have AI features enabled —
-  the fallback notice says so on screen rather than pretending it succeeded.
-  **Gotcha if you ever edit the instruction text**
-  (`EXTRACTION_INSTRUCTION` in `src/sanity/lib/agentSearch.ts`): Sanity's
-  agent API treats any `$word` in the instruction as a template variable
-  needing a matching `instructionParams` key — a literal example like
-  "under $100" in the instruction text itself (not the user's query, which
-  is safely passed via `instructionParams`) will 400 with "missing
-  instructionParams" on every single call. Hit this exact bug once; avoid
-  writing a bare `$` followed by a word or digits anywhere in the
-  instruction string.
 - **The audit panel is preset-prompts-only by design, for this pass** — not a
   placeholder waiting on a live LLM call. Free text stays visually typeable
   (so the box doesn't look fake) but only matches the five preset prompts

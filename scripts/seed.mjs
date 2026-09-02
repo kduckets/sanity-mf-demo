@@ -231,99 +231,6 @@ const products = [
   },
 ];
 
-// Dedicated catalog for the structured-search demo (Use Case 1/2 supplement)
-// — kept out of `products` above and out of every capsule drop's product
-// list, so it never touches the Acts 1–3 flow. Two exact matches for "blue
-// wool sweaters under $100, size M"; the rest each fail exactly one
-// constraint, to make the contrast with the fake similarity panel legible.
-// Non-matches skip `image` — they're never rendered, only queried.
-const searchDemoProducts = [
-  {
-    _id: "product-search-demo-001",
-    name: "Cove Blue Wool Crewneck",
-    sku: "SD-001",
-    price: 88,
-    availabilityStatus: "in_stock",
-    category: "sweater",
-    color: "blue",
-    materials: ["wool"],
-    availableSizes: ["S", "M", "L"],
-    image: WM("c/c4/Oceans_and_trees_Fair_Isle_pullover.jpg/1280px-Oceans_and_trees_Fair_Isle_pullover.jpg"),
-  },
-  {
-    _id: "product-search-demo-002",
-    name: "Slate Blue Lambswool Sweater",
-    sku: "SD-002",
-    price: 96,
-    availabilityStatus: "in_stock",
-    category: "sweater",
-    color: "blue",
-    materials: ["wool", "lambswool"],
-    availableSizes: ["M", "L"],
-    image: WM("c/c4/Oceans_and_trees_Fair_Isle_pullover.jpg/1280px-Oceans_and_trees_Fair_Isle_pullover.jpg"),
-  },
-  {
-    _id: "product-search-demo-003",
-    name: "Cove Blue Cotton Crewneck",
-    sku: "SD-003",
-    // Fails the material constraint (cotton, not wool).
-    price: 74,
-    availabilityStatus: "in_stock",
-    category: "sweater",
-    color: "blue",
-    materials: ["cotton"],
-    availableSizes: ["S", "M", "L"],
-  },
-  {
-    _id: "product-search-demo-004",
-    name: "Amber Wool Crewneck",
-    sku: "SD-004",
-    // Fails the color constraint (amber, not blue).
-    price: 92,
-    availabilityStatus: "in_stock",
-    category: "sweater",
-    color: "amber",
-    materials: ["wool"],
-    availableSizes: ["M"],
-  },
-  {
-    _id: "product-search-demo-005",
-    name: "Cove Blue Wool Sweater",
-    sku: "SD-005",
-    // Fails the price constraint (over $100).
-    price: 128,
-    availabilityStatus: "in_stock",
-    category: "sweater",
-    color: "blue",
-    materials: ["wool"],
-    availableSizes: ["M"],
-  },
-  {
-    _id: "product-search-demo-006",
-    name: "Cove Blue Wool Pullover",
-    sku: "SD-006",
-    // Fails the size/stock constraint (no M in stock).
-    price: 84,
-    availabilityStatus: "in_stock",
-    category: "sweater",
-    color: "blue",
-    materials: ["wool"],
-    availableSizes: ["S", "L"],
-  },
-  {
-    _id: "product-search-demo-007",
-    name: "Cove Blue Wool Scarf",
-    sku: "SD-007",
-    // Fails the category constraint (scarf, not sweater).
-    price: 68,
-    availabilityStatus: "in_stock",
-    category: "scarf",
-    color: "blue",
-    materials: ["wool"],
-    availableSizes: [],
-  },
-];
-
 // Editorial/magazine content (Use Case 4) — deliberately separate from the
 // three capsule drops' own `editorialStory` field. Each article carries at
 // most one intentional gap for the audit panel to find; one is left clean as
@@ -512,17 +419,10 @@ async function seedProducts(list) {
       lastPimEventAt: new Date().toISOString(),
       pimEventId: `evt_${randomKey()}`,
     };
-    // Search-demo non-matches skip an image — they're only ever queried, never rendered.
-    if (product.image) {
-      const image = await uploadImageFromUrl(product._id, product.image, `${product.sku}.jpg`);
-      doc.image = imageField(image);
-    }
+    const image = await uploadImageFromUrl(product._id, product.image, `${product.sku}.jpg`);
+    doc.image = imageField(image);
     if (product.price !== undefined) doc.price = product.price;
     if (product.previousPrice !== undefined) doc.previousPrice = product.previousPrice;
-    if (product.category !== undefined) doc.category = product.category;
-    if (product.color !== undefined) doc.color = product.color;
-    if (product.materials !== undefined) doc.materials = product.materials;
-    if (product.availableSizes !== undefined) doc.availableSizes = product.availableSizes;
 
     await discardDraft(product._id);
     await client.createOrReplace(doc);
@@ -606,7 +506,7 @@ async function seedDrops() {
 }
 
 try {
-  await seedProducts([...products, ...searchDemoProducts]);
+  await seedProducts(products);
   await seedDrops();
   await seedEditorialArticles();
   console.log("\nDone. Two products are deliberately not-ready:");
@@ -616,13 +516,9 @@ try {
     "\nOpen the Autumn Reverie drop in Studio to see the readiness warning.",
   );
   console.log(
-    "\nThree editorial articles carry a deliberate gap for the audit panel\n" +
-      '(Studio → "Editorial Audit"): missing alt text, a broken product link,\n' +
+    "\nThree editorial articles carry a deliberate gap for Content Agent\n" +
+      '(Studio → "Content Agent"): missing alt text, a broken product link,\n' +
       "and stale promo copy on the Golden Hour restock piece. A fourth is clean.",
-  );
-  console.log(
-    '\n"Cove Blue Wool Crewneck" and "Slate Blue Lambswool Sweater" are the\n' +
-      "only exact matches for the /search-demo constraint-based query.",
   );
   console.log("\nImage sources (Wikimedia Commons, freely licensed):");
   console.log(credits.join("\n"));
