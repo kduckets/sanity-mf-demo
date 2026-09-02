@@ -418,6 +418,27 @@ product link for readers to shop). Check a couple of boxes and click
 list. Open the affected article in **Editorial Articles** afterward if you
 want to show the write actually landed.
 
+**Editorial, continued — Canvas (~1 min, if the room has time).** *"And
+before Content Agent ever needs to clean anything up, here's how the
+writing itself happens."* Canvas is a separate, hosted, login-gated app —
+not part of this Next.js deployment — so switch to a second browser tab
+already logged into your Sanity account. Open a draft for one of the
+**Editorial Articles** and point at the writable surface: title, dek, body,
+and promo copy are configured as Canvas fields (`options.canvasApp` in
+`editorialArticle.ts`); structural fields — slug, cover image, the drop/
+product references, `needsReview` — are deliberately excluded, since
+they're not something a writer free-writes. Show the AI-assisted drafting
+experience, and if the document is linked, that the draft flows into the
+same Studio fields Content Agent was just auditing.
+
+**This one has real setup risk, more than anything else in the demo** —
+Canvas needs the one-time Dashboard onboarding step for embedded studios
+(a manual step in manage.sanity.io only you can do) and a deployed schema
+manifest (`npx sanity schemas deploy` — already done for this project, but
+redeploy it if the schema changes again). Test it once, live, before you go
+on stage — this is the one piece I can't verify myself, since it needs your
+account.
+
 Close by naming the bottom line out loud: *"Nine writers, unlimited scale."*
 Then hand off to Q&A.
 
@@ -472,6 +493,12 @@ Then hand off to Q&A.
 - **Applying an audit fix is a real, one-way mutation.** Re-running
   `npm run seed` resets the four editorial articles back to their seeded gaps
   if you want to demo the same check twice in rehearsal.
+- **Canvas is the least-tested piece of this whole demo.** It's a separate
+  hosted app gated on your own Sanity login, an embedded-studio Dashboard
+  onboarding step, and a schema manifest that has to be redeployed by hand
+  after any schema change (see §3) — none of which I can verify from here.
+  If it's not connected by the time you go on stage, skip it; nothing else
+  in the script depends on it.
 - **Resetting mid-rehearsal.** If anything gets into a weird state, `npm run
   seed` puts both drops back to their scripted starting state in a few
   seconds.
