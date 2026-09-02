@@ -226,15 +226,19 @@ CMS demo:
 - **Content Agent.** Studio → **Content Agent**
   (`src/sanity/components/EditorialAuditPane.tsx`, a plain custom Structure
   Tool pane — no iframe, no comlink, so it doesn't share Presentation Tool's
-  reliability issues) is a chat-box-styled panel over three real, deterministic
+  reliability issues) is a chat-box-styled panel over five real, deterministic
   GROQ checks against `editorialArticle` documents: missing alt text, product
-  references that don't resolve to a live SKU, and stale promo copy. Each
-  check surfaces genuine gaps in the seeded content, lets you select which to
-  fix, and **Apply** writes a real mutation via the Studio's own Sanity
-  client — not a scripted animation. Free text in the input only matches the
-  three preset prompts (shown as chips below it); anything else surfaces an
-  honest "not wired to a live model" message rather than pretending to parse
-  it. This is deliberately reliable-over-clever: no external LLM call to fail
+  references that don't resolve to a live SKU, stale promo copy, a genuine
+  **bulk edit** (batch-filling promo copy on every article missing one), and
+  a **gap-analysis** example (high-traffic articles — a simulated
+  `weeklyViews` field stands in for a real analytics feed — with no product
+  link for readers to shop). Each check surfaces genuine gaps in the seeded
+  content, lets you select which to fix, and **Apply** writes a real mutation
+  via the Studio's own Sanity client — not a scripted animation. Free text in
+  the input only matches the five preset prompts (shown as chips below it);
+  anything else surfaces an honest "not wired to a live model" message rather
+  than pretending to parse it. This is deliberately reliable-over-clever: no
+  external LLM call to fail
   live on stage. **Naming note:** this pane is labeled "Content Agent" to
   match the deck's Use Case 4 language, but it's a custom Structure Tool
   pane calling Agent Actions directly — not Sanity's own hosted, org-level
@@ -335,14 +339,18 @@ fuzzy alternative) — it reads fine here in Act 4, or fold it into Act 2 right
 after the live-sync beat if you'd rather land both live-query proof points
 back to back.
 
-**Editorial — the audit panel (~1–2 min).** *"And this one's for editorial —
+**Editorial — Content Agent (~1–2 min).** *"And this one's for editorial —
 with nine writers covering fourteen drops a year, this is where that
-scales."* In Studio, open **Content Agent**. Click the three example
-prompts in turn — missing alt text, a broken product link, and stale promo
-copy on the Golden Hour restock piece all surface as real, staged findings.
-Check a couple of boxes and click **Apply**; the panel re-runs the check and
-the fixed items drop off the list. Open the affected article in **Editorial
-Articles** afterward if you want to show the write actually landed.
+scales."* In Studio, open **Content Agent**. Click a few of the example
+prompts — missing alt text, a broken product link, and stale promo copy on
+the Golden Hour restock piece all surface as real, staged findings. If time
+allows, show one of each flavor named in the deck: the **bulk edit** prompt
+(batch-fills promo copy across every article missing one in a single Apply)
+and the **gap-analysis** prompt (the one high-traffic article with no
+product link for readers to shop). Check a couple of boxes and click
+**Apply**; the panel re-runs the check and the fixed items drop off the
+list. Open the affected article in **Editorial Articles** afterward if you
+want to show the write actually landed.
 
 Close by naming the bottom line out loud: *"Nine writers, unlimited scale."*
 Then hand off to Q&A.
@@ -390,7 +398,7 @@ Then hand off to Q&A.
   instruction string.
 - **The audit panel is preset-prompts-only by design, for this pass** — not a
   placeholder waiting on a live LLM call. Free text stays visually typeable
-  (so the box doesn't look fake) but only matches the three preset prompts
+  (so the box doesn't look fake) but only matches the five preset prompts
   exactly (case-insensitive); anything else shows an honest "not wired to a
   live model" message, not an error. This keeps the panel's reliability
   independent of any external API on stage. Revisit wiring up a real model

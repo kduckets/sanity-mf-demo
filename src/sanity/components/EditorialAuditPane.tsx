@@ -83,6 +83,41 @@ const CHECKS: Check[] = [
       }))
     },
   },
+  {
+    id: 'bulk-add-promo-copy',
+    prompt: 'Bulk-add promo copy to articles missing one',
+    run: async (client) => {
+      const docs = await client.fetch<{ _id: string; title: string }[]>(
+        `*[_type == "editorialArticle" && !defined(promoCopy)]{_id, title}`,
+      )
+      return docs.map((doc) => ({
+        id: `${doc._id}:add-promo-copy`,
+        docId: doc._id,
+        title: doc.title,
+        explanation: 'No promo copy set — nothing to show wherever this article gets a badge or teaser.',
+        fixDescription: 'Set promo copy to "Read the story."',
+        applyFix: (client: Client) =>
+          client.patch(doc._id).set({ promoCopy: 'Read the story.' }).commit(),
+      }))
+    },
+  },
+  {
+    id: 'high-traffic-missing-product',
+    prompt: 'Find high-traffic articles missing a related product',
+    run: async (client) => {
+      const docs = await client.fetch<{ _id: string; title: string; weeklyViews: number }[]>(
+        `*[_type == "editorialArticle" && defined(weeklyViews) && weeklyViews > 2000 && !defined(relatedProduct)]{_id, title, weeklyViews}`,
+      )
+      return docs.map((doc) => ({
+        id: `${doc._id}:high-traffic-no-product`,
+        docId: doc._id,
+        title: doc.title,
+        explanation: `${doc.weeklyViews.toLocaleString()} views this week, but no product link for readers to shop.`,
+        fixDescription: 'Flag for editor review',
+        applyFix: (client: Client) => client.patch(doc._id).set({ needsReview: true }).commit(),
+      }))
+    },
+  },
 ]
 
 const cardStyle: React.CSSProperties = {

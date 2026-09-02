@@ -337,6 +337,7 @@ const editorialArticles = [
     dek: "Three ways to layer this season's key pieces, from studio to street.",
     coverImage: WM("7/71/Forest_path_through_yellow_autumn_leaves_in_Tuntorp_1.jpg/1280px-Forest_path_through_yellow_autumn_leaves_in_Tuntorp_1.jpg"),
     // Deliberately no alt text — the "missing alt text" audit gap.
+    weeklyViews: 620,
     body: [
       "The trick to layering isn't more pieces — it's picking three that actually earn their place. Start with something close and light, add one piece of real structure, and finish with the layer you'd wear alone on a warmer day.",
       "This season that means the Honeycomb Merino Sweater under the Ochre Wool Trench, with the Amber Cashmere Scarf doing the work a fourth layer usually would. Swap the trench for the Marigold Puffer on the coldest days and the formula still holds.",
@@ -353,6 +354,7 @@ const editorialArticles = [
     coverImageAlt: "Wilder Row's studio workspace",
     // Points at a product id that doesn't exist — the "broken product link" gap.
     relatedProductId: "product-av-wr-999",
+    weeklyViews: 1900,
     body: [
       "Amara Voss keeps a corkboard of gig posters over her cutting table, and Autumn Reverie started as a note scrawled across one of them: a coat silhouette, an arrow, the word 'heavier.'",
       "By the time we visited, that note had become a dozen fittings and a wall of fabric swatches in ochre and rust. Nothing on the rack yet looked like the finished line — that's the part that doesn't photograph well, and the part that matters most.",
@@ -371,6 +373,8 @@ const editorialArticles = [
     // Golden Hour is fully published and ready — this copy just never got
     // updated. The "stale promo copy" gap.
     promoCopy: "Coming soon — details TBD",
+    // High traffic + no product link — the "high-traffic gap" check.
+    weeklyViews: 5200,
     body: [
       "Golden Hour sold through its first run in eleven days, which is either a good problem or an object lesson in ordering enough puffer jackets, depending who at Marlowe Studio you ask.",
       "The restock brings back all four pieces — the Marigold Puffer, the Honeycomb Merino Sweater, the Field Canvas Tote, the Sundown Suede Mules — in the same quantities as the original drop. No changes, no reprint of the story. Some capsules don't need a second chapter, just a second chance to catch them.",
@@ -388,6 +392,7 @@ const editorialArticles = [
     relatedProductId: "product-sf-dv-006",
     promoCopy: "Now live — shop the drop.",
     // No gaps — control case, proves the audit doesn't flag everything.
+    weeklyViews: 980,
     body: [
       "Dana Vela hand-tied every dye lot for Peaceable Kingdom on the same wheel where Slow Fauna started as a market-stall side project. This zine is the record of that process — the coyotes, the moths, the weeds pushing through parking-lot cracks — before any of it became a product photo.",
       "Issue No. 1 is six pieces and six pages, one for each. It's a slow read on purpose.",
@@ -546,6 +551,7 @@ async function seedEditorialArticles() {
     };
     if (article.body) doc.body = toPortableText(article.body);
     if (article.promoCopy !== undefined) doc.promoCopy = article.promoCopy;
+    if (article.weeklyViews !== undefined) doc.weeklyViews = article.weeklyViews;
     if (article.relatedDropId) {
       doc.relatedDrop = { _type: "reference", _ref: article.relatedDropId };
     }
