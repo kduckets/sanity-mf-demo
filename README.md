@@ -81,6 +81,32 @@ never touches the core Acts 1–3 flow:
   on the already-published Golden Hour restock piece); the fourth is clean, so
   the audit panel doesn't read as flagging everything indiscriminately.
 
+### Optional: schema manifest for Canvas / Content Agent-style tooling
+
+Sanity's dashboard-hosted tools (Canvas, the org-level Content Agent app —
+distinct from this project's own Studio-embedded "Content Agent" pane) read
+your schema from a manifest document stored **in the dataset**, not from the
+running Studio. This project's Studio is embedded in the Next.js app rather
+than `sanity deploy`-hosted, and nothing publishes that manifest
+automatically, so those tools will 404 with something like:
+
+```
+Not Found - Schema for schemaId '_.schemas.marlowe-finch' could not be found.
+```
+
+Fix it by deploying the manifest directly:
+
+```bash
+npx sanity login          # one-time; needs a browser
+npx sanity schemas deploy
+```
+
+**This drifts stale.** Every schema change in this repo needs a redeploy —
+`npx sanity schemas deploy` again — or dashboard tools keep reading
+outdated field shapes. It's not part of `npm run seed` or the build; run it
+by hand whenever `src/sanity/schemaTypes/` changes and you plan to use
+Canvas or the dashboard's Content Agent.
+
 ## 4. Run it
 
 **For the actual interview, running locally is still the plan** — no network
