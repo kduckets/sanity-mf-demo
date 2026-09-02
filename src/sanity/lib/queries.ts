@@ -23,7 +23,7 @@ export interface DropProduct {
   price?: number
   previousPrice?: number
   availabilityStatus?: string
-  lastSyncedAt?: string
+  lastPimEventAt?: string
   image?: Image
 }
 
@@ -61,7 +61,7 @@ export const SPOTLIGHT_PRODUCT_POOL_QUERY = defineQuery(`
     price,
     previousPrice,
     availabilityStatus,
-    lastSyncedAt,
+    lastPimEventAt,
     image
   }
 `)
@@ -136,7 +136,7 @@ export const CAPSULE_DROP_QUERY = defineQuery(`
         price,
         previousPrice,
         availabilityStatus,
-        lastSyncedAt,
+        lastPimEventAt,
         image
       }
     }

@@ -24,7 +24,7 @@ export const product = defineType({
       title: 'Price (USD)',
       type: 'number',
       description:
-        'Leave empty to simulate a product the legacy PIM has not synced pricing for yet.',
+        'Leave empty to simulate a product the legacy PIM has not sent a price event for yet.',
       validation: (Rule) => Rule.positive(),
     }),
     defineField({
@@ -51,11 +51,21 @@ export const product = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: 'lastSyncedAt',
-      title: 'Last synced at',
+      name: 'lastPimEventAt',
+      title: 'Last PIM webhook event',
       type: 'datetime',
-      description: 'Simulates the timestamp the legacy PIM last pushed data for this SKU.',
+      description:
+        'Timestamp of the last webhook-triggered mutation from the legacy PIM for this SKU — an ' +
+        'event landing via API, not a batch sync catching up on a schedule.',
       initialValue: () => new Date().toISOString(),
+    }),
+    defineField({
+      name: 'pimEventId',
+      title: 'PIM event ID',
+      type: 'string',
+      description:
+        'Simulates the idempotency key a real PIM webhook payload would carry, so a redelivered ' +
+        'event mutates this document once, not twice.',
     }),
     defineField({
       name: 'image',

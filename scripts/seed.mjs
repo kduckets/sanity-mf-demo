@@ -507,7 +507,10 @@ async function seedProducts(list) {
       name: product.name,
       sku: product.sku,
       availabilityStatus: product.availabilityStatus,
-      lastSyncedAt: new Date().toISOString(),
+      // Stands in for the webhook-triggered mutation a real PIM integration
+      // would send — an event landing via API, not a batch job catching up.
+      lastPimEventAt: new Date().toISOString(),
+      pimEventId: `evt_${randomKey()}`,
     };
     // Search-demo non-matches skip an image — they're only ever queried, never rendered.
     if (product.image) {

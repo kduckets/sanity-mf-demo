@@ -156,6 +156,19 @@ CMS demo:
 - **One content model.** `capsuleDrop` holds the editorial story and references
   to `product` documents. `product` stands in for what a legacy PIM would feed
   in. See `src/sanity/schemaTypes/`.
+- **The PIM connection is a webhook triggering a real mutation, not a batch
+  job.** The intended production shape — and the reason `product`'s fields
+  are named the way they are — is: the PIM fires a webhook on every price or
+  availability change, a serverless function verifies it and calls Sanity's
+  API to run a `patch` mutation against the matching `product` document, and
+  that mutation hits the Content Lake immediately, which is what the Live
+  Content API is actually subscribing to. `lastPimEventAt` and `pimEventId`
+  (an idempotency key, so a redelivered webhook doesn't double-mutate the
+  document) name that path directly, instead of the vaguer "synced" language
+  a batch-oriented system would use. This demo has no real PIM to wire a
+  webhook to, so Act 2 drives the same mutation by hand in Studio — the
+  point being made is what happens *after* that mutation lands (instant,
+  live, no batch delay), which is identical either way it's triggered.
 - **Readiness validation.** `capsuleDrop` has an async, document-level
   validation rule (`src/sanity/schemaTypes/capsuleDrop.ts`) that dereferences
   every linked product and blocks publishing if any product is `pending`,
@@ -298,7 +311,10 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
    errors, pointing at the `products` field.
 3. Open **Products → Copper Knit Vest** (in the same tab, or a third tab).
    Change **Availability status** from `Pending` to `In stock` and let it
-   autosave.
+   autosave. *(If asked: in production this same field-level change arrives
+   as a mutation via the Sanity API, triggered by a webhook from the PIM —
+   we're driving it by hand here so the room can see cause and effect
+   together; what happens next is identical either way.)*
 4. Switch back to the drop document tab — no refresh. Watch the readiness panel
    update live: one issue left (the missing price).
 5. Open **Umber Wide-Leg Trouser**, add a price (e.g. `238`), let it autosave.
