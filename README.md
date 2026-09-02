@@ -148,7 +148,7 @@ CMS demo:
 - **`/studio`** — the Sanity Studio, embedded in the same app, including a
   **Presentation** tool tab that iframes the `/preview/*` pages for
   click-to-edit and drag-and-drop reordering (see below), an **Editorial
-  Articles** document list, and an **Editorial Audit** custom pane (Act 4, for
+  Articles** document list, and a **Content Agent** custom pane (Act 4, for
   editorial — see below)
 
 ## How it works
@@ -223,7 +223,7 @@ CMS demo:
   standing example of extending Studio's action bar for a custom step in the
   launch workflow; `onHandle` is a placeholder (a real integration would post
   to a webhook or send an email from there).
-- **Editorial content audit.** Studio → **Editorial Audit**
+- **Content Agent.** Studio → **Content Agent**
   (`src/sanity/components/EditorialAuditPane.tsx`, a plain custom Structure
   Tool pane — no iframe, no comlink, so it doesn't share Presentation Tool's
   reliability issues) is a chat-box-styled panel over three real, deterministic
@@ -235,7 +235,13 @@ CMS demo:
   three preset prompts (shown as chips below it); anything else surfaces an
   honest "not wired to a live model" message rather than pretending to parse
   it. This is deliberately reliable-over-clever: no external LLM call to fail
-  live on stage.
+  live on stage. **Naming note:** this pane is labeled "Content Agent" to
+  match the deck's Use Case 4 language, but it's a custom Structure Tool
+  pane calling Agent Actions directly — not Sanity's own hosted, org-level
+  Content Agent product (which lives in the Sanity dashboard and, as of this
+  writing, requires a studio-connect step this embedded studio doesn't yet
+  satisfy). Know the difference if asked; the underlying capability (real
+  GROQ checks, real staged fixes) is genuine either way.
 - **Structured search vs. similarity search, via a real Content Agent call.**
   `/search-demo` is a two-panel contrast, editable — type any request, not
   just the example. The left panel is a **hardcoded, intentionally-wrong**
@@ -331,7 +337,7 @@ back to back.
 
 **Editorial — the audit panel (~1–2 min).** *"And this one's for editorial —
 with nine writers covering fourteen drops a year, this is where that
-scales."* In Studio, open **Editorial Audit**. Click the three example
+scales."* In Studio, open **Content Agent**. Click the three example
 prompts in turn — missing alt text, a broken product link, and stale promo
 copy on the Golden Hour restock piece all surface as real, staged findings.
 Check a couple of boxes and click **Apply**; the panel re-runs the check and

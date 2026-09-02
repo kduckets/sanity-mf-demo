@@ -1,5 +1,5 @@
 import { DocumentTextIcon } from '@sanity/icons/DocumentText'
-import { defineField, defineType } from 'sanity'
+import { defineArrayMember, defineField, defineType } from 'sanity'
 
 // Represents the magazine/lookbook/creator-content layer that sits alongside
 // capsule drops — the kind of scattered marketing content Use Case 1 (and the
@@ -17,12 +17,15 @@ export const editorialArticle = defineType({
       title: 'Title',
       type: 'string',
       validation: (Rule) => Rule.required(),
+      options: {
+        canvasApp: { purpose: 'The article headline.' },
+      },
     }),
     defineField({
       name: 'slug',
       title: 'Slug',
       type: 'slug',
-      options: { source: 'title', maxLength: 96 },
+      options: { source: 'title', maxLength: 96, canvasApp: { exclude: true } },
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -32,6 +35,7 @@ export const editorialArticle = defineType({
       options: {
         list: ['Magazine', 'Lookbook', 'Creator content'],
         layout: 'radio',
+        canvasApp: { exclude: true },
       },
       initialValue: 'Magazine',
     }),
@@ -41,12 +45,31 @@ export const editorialArticle = defineType({
       description: 'One or two sentence summary shown wherever this article is listed.',
       type: 'text',
       rows: 2,
+      options: {
+        canvasApp: {
+          purpose:
+            'A one- or two-sentence hook shown wherever this article is listed — not the whole story, just the pull.',
+        },
+      },
+    }),
+    defineField({
+      name: 'body',
+      title: 'Body',
+      description: 'The full article — the writing surface Canvas drafts flow into.',
+      type: 'array',
+      of: [defineArrayMember({ type: 'block' })],
+      options: {
+        canvasApp: {
+          purpose:
+            'The full article body, in the voice of Marlowe & Finch\'s in-house magazine — write the piece here.',
+        },
+      },
     }),
     defineField({
       name: 'coverImage',
       title: 'Cover image',
       type: 'image',
-      options: { hotspot: true },
+      options: { hotspot: true, canvasApp: { exclude: true } },
       fields: [
         defineField({
           name: 'alt',
@@ -61,12 +84,18 @@ export const editorialArticle = defineType({
       title: 'Promo copy',
       description: 'Short live-status line, e.g. shown as a badge — the kind of copy that goes stale.',
       type: 'string',
+      options: {
+        canvasApp: {
+          purpose: 'A short, punchy live-status line, e.g. "Now live — shop the drop."',
+        },
+      },
     }),
     defineField({
       name: 'relatedDrop',
       title: 'Related capsule drop',
       type: 'reference',
       to: [{ type: 'capsuleDrop' }],
+      options: { canvasApp: { exclude: true } },
     }),
     defineField({
       name: 'relatedProduct',
@@ -76,6 +105,7 @@ export const editorialArticle = defineType({
       weak: true,
       description:
         'Weak reference, matching how a real link goes stale — if the product is renamed or removed, this can point at nothing. Deliberately broken on one seeded article; the audit checks for this.',
+      options: { canvasApp: { exclude: true } },
     }),
     defineField({
       name: 'needsReview',
@@ -84,6 +114,7 @@ export const editorialArticle = defineType({
       description: 'Set by the editorial audit panel when it flags this article for a human to look at.',
       initialValue: false,
       readOnly: true,
+      options: { canvasApp: { exclude: true } },
     }),
   ],
   preview: {

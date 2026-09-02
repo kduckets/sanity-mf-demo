@@ -173,10 +173,9 @@ export function EditorialAuditPane() {
 
   return (
     <div style={{ padding: 24, maxWidth: 720 }}>
-      <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>Editorial content audit</h2>
+      <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>Content Agent</h2>
       <p style={{ marginTop: 8, color: 'var(--card-muted-fg-color, #666)' }}>
-        Ask what to check across editorial content — bulk edits, content audits, and gap
-        analysis in one conversation, the way Content Agent does it.
+        Bulk edits, content audits, and gap analysis — in one conversation.
       </p>
 
       <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>

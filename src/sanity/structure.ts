@@ -24,7 +24,7 @@ export const structure: StructureResolver = (S) =>
         .child(S.documentTypeList('editorialArticle').title('Editorial Articles')),
       S.divider(),
       S.listItem()
-        .title('Editorial Audit')
+        .title('Content Agent')
         .icon(RobotIcon)
-        .child(S.component(EditorialAuditPane).title('Editorial Audit')),
+        .child(S.component(EditorialAuditPane).title('Content Agent')),
     ])
