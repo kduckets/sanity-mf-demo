@@ -102,6 +102,22 @@ outdated field shapes. It's not part of `npm run seed` or the build; run it
 by hand whenever `src/sanity/schemaTypes/` changes and you plan to use
 Canvas or the dashboard's Content Agent.
 
+**There's a second, separate registration step.** Deploying the schema
+manifest is necessary but not sufficient — Canvas also needs this embedded
+studio registered as an **Application** in the project (a dashboard-level
+concept, distinct from the schema manifest), or "Link to Canvas" fails with
+`Studio import failed. No application found.` Fix it once with:
+
+```bash
+npx sanity deploy --external --url https://sanity-mf-demo.vercel.app/studio
+```
+
+This registers the app and prints an `appId`, already saved in
+`sanity.cli.ts`'s `deployment.appId` for this project — so it won't prompt
+again on future `sanity deploy`/`sanity schemas deploy` runs. Unlike the
+schema manifest, this registration is a one-time thing per studio, not
+something that needs to be redone after every schema change.
+
 ## 4. Run it
 
 **For the actual interview, running locally is still the plan** — no network
@@ -400,13 +416,12 @@ they're not something a writer free-writes. Show the AI-assisted drafting
 experience, and if the document is linked, that the draft flows into the
 same Studio fields Content Agent was just auditing.
 
-**This one has real setup risk, more than anything else in the demo** —
-Canvas needs the one-time Dashboard onboarding step for embedded studios
-(a manual step in manage.sanity.io only you can do) and a deployed schema
-manifest (`npx sanity schemas deploy` — already done for this project, but
-redeploy it if the schema changes again). Test it once, live, before you go
-on stage — this is the one piece I can't verify myself, since it needs your
-account.
+**Setup is done** — the schema manifest is deployed and this studio is
+registered as an Application (see §3), which together fixed the two errors
+we hit getting here (schema-not-found, then "no application found"). What's
+still unverified is the actual Canvas writing/AI experience itself, since
+that needs your account and I can't click through it. Test it once, live,
+before you go on stage.
 
 Close by naming the bottom line out loud: *"Nine writers, unlimited scale."*
 Then hand off to Q&A.
@@ -441,12 +456,12 @@ Then hand off to Q&A.
 - **Applying an audit fix is a real, one-way mutation.** Re-running
   `npm run seed` resets the four editorial articles back to their seeded gaps
   if you want to demo the same check twice in rehearsal.
-- **Canvas is the least-tested piece of this whole demo.** It's a separate
-  hosted app gated on your own Sanity login, an embedded-studio Dashboard
-  onboarding step, and a schema manifest that has to be redeployed by hand
-  after any schema change (see §3) — none of which I can verify from here.
-  If it's not connected by the time you go on stage, skip it; nothing else
-  in the script depends on it.
+- **Canvas is still the least-verified piece of this demo,** even with setup
+  done. It's a separate, login-gated hosted app I can't click through
+  myself — the schema manifest and app registration (see §3) are confirmed
+  correct, but the actual writing/AI experience inside Canvas hasn't been
+  tested end-to-end. If it misbehaves on stage, skip it; nothing else in the
+  script depends on it.
 - **Resetting mid-rehearsal.** If anything gets into a weird state, `npm run
   seed` puts both drops back to their scripted starting state in a few
   seconds.
