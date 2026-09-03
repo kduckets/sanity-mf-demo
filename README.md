@@ -201,7 +201,10 @@ CMS demo:
   a batch-oriented system would use. This demo has no real PIM to wire a
   webhook to, so Act 2 drives the same mutation by hand in Studio — the
   point being made is what happens *after* that mutation lands (instant,
-  live, no batch delay), which is identical either way it's triggered.
+  live, no batch delay), which is identical either way it's triggered. This
+  is one-directional: the PIM stays the system of record, and Sanity never
+  writes back to it. Merchandising's role is seeing this live data and
+  confirming it before publish, not editing price inside Sanity.
 - **Readiness validation.** `capsuleDrop` has an async, document-level
   validation rule (`src/sanity/schemaTypes/capsuleDrop.ts`) that dereferences
   every linked product and blocks publishing if any product is `pending`,
@@ -340,10 +343,14 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
    room to wait on).
 3. Open **Products → Copper Knit Vest** (in the same tab, or a third tab).
    Change **Availability status** from `Pending` to `In stock` and let it
-   autosave. *(If asked: in production this same field-level change arrives
-   as a mutation via the Sanity API, triggered by a webhook from the PIM —
-   we're driving it by hand here so the room can see cause and effect
-   together; what happens next is identical either way.)*
+   autosave. *(If asked — and worth being precise about, since this is an
+   easy thing to misstate live: in production, no one edits this field by
+   hand. The PIM stays the system of record and pushes this change via a
+   webhook-triggered mutation; Sanity references it live. Merchandising's
+   role is to* **see** *it and* **confirm** *it before publish — never to
+   edit price or availability inside Sanity. We're playing the part of that
+   automated push by hand here, purely so the room can watch cause and
+   effect together; what happens next in the demo is identical either way.)*
 4. Switch back to the drop document tab — no refresh. Watch the readiness panel
    update live: one issue left (the missing price).
 5. Open **Umber Wide-Leg Trouser**, add a price (e.g. `238`), let it autosave.
@@ -362,10 +369,16 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
 ### Act 3 — publish
 
 1. Back in Studio, click **Publish**. It goes through this time.
-2. Switch to the public storefront tab and refresh: now shows the resolved,
+2. Point at the new **Notify wholesale** button, now enabled since the drop
+   is actually published. *"Studio is an open-source React app — this
+   button doesn't exist in stock Sanity, it's a few dozen lines added for
+   this exact workflow. Nothing here is a locked-down GUI."* (Optional
+   click-through: it's a placeholder dialog, not wired to a real webhook —
+   don't imply it sends a real notification.)
+3. Switch to the public storefront tab and refresh: now shows the resolved,
    in-stock, correctly-priced page — no preview mode needed anymore.
 
-### Engineering detour — schema-as-code & GROQ (~1–2 min, optional)
+### Engineering detour — schema-as-code & GROQ (~1–2 min, optional, Use Case 2)
 
 For the engineers in the room specifically, right where their attention is
 already highest. *"Since none of what you just watched is a proprietary
@@ -374,13 +387,29 @@ GUI — quick look at what's actually driving it."* Switch to your editor:
 - **Schema-as-code:** open `src/sanity/schemaTypes/product.ts` and
   `capsuleDrop.ts` — the whole content model, including the readiness
   validation rule that just blocked Publish, is plain version-controlled
-  TypeScript (`defineType`/`defineField`), not config buried in a GUI.
+  TypeScript (`defineType`/`defineField`), not config buried in a GUI. *"This
+  is also how the WordPress migration itself runs — schema defined and
+  versioned as code, shipping incrementally, not one big cutover."* (Don't
+  attach a timeline to this — see the caution below.)
 - **GROQ:** open `src/sanity/lib/queries.ts` and show `CAPSULE_DROP_QUERY` —
   one query dereferencing the drop's editorial story and every linked
   product's live price/availability in a single round trip. Or run
   something live in Studio's **Vision** tab (already in the nav) — e.g.
   `*[_type == "product" && availabilityStatus == "sold_out"]` — a plain
   filter against real content, no query builder, no separate API per field.
+
+**Optional, spoken-only talking point — no live demo for this one.** If the
+room wants a concrete example of GROQ-as-constraint-system, the deck's own
+shopping-assistant scenario works as narration without touching the app:
+*"A customer asks for 'blue wool sweaters under $100 in size M.' A
+similarity-search chatbot returns a $400 cashmere coat, a blue cotton tee,
+and a wool scarf — all related, none matching. An agent built on Sanity
+doesn't search for similar — it writes a GROQ query: category, color,
+material, price, size, all as hard constraints. Every result matches every
+constraint."* *(There was previously a live `/search-demo` page built for
+this — it's been removed from the app. This is now narration only, matching
+how the deck itself frames it: "to use if the room wants a concrete
+example." Say if you'd rather it be rebuilt as a real demo again.)*
 
 No fixed script here — you know this codebase, drive it live. Keep it
 tight; it's a detour, not a new act.
@@ -428,6 +457,18 @@ Then hand off to Q&A.
 
 ## Known fragile points (and how to rehearse around them)
 
+- **Three things the deck explicitly says not to say — easy to slip on live:**
+  1. **Don't imply merchandising edits price or availability inside Sanity.**
+     The PIM is the system of record; Sanity references it live. It's a
+     read/reference relationship, not a two-way sync — Sanity never writes
+     back to the PIM. Act 2's manual field edit stands in for the PIM's own
+     webhook push; say so explicitly (the script's aside there does this).
+  2. **Don't commit to a specific migration timeline** ("weeks, not months,"
+     or any other estimate). If pressed, redirect to the Next Steps slide's
+     2–3 week pilot environment instead of estimating live.
+  3. **Don't imply the "Notify wholesale" button (Act 3) sends a real
+     notification.** It's a placeholder dialog — a real integration would
+     post to a webhook or send an email from there, but this one doesn't.
 - **Live-panel timing.** The readiness panel and storefront both update within
   a couple of seconds via `client.listen()` / Sanity's Live Content API, not
   instantly. Narrate through the couple-second gap rather than clicking twice —
