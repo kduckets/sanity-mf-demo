@@ -432,26 +432,6 @@ product link for readers to shop). Check a couple of boxes and click
 list. Open the affected article in **Editorial Articles** afterward if you
 want to show the write actually landed.
 
-**Editorial, continued — Canvas (~1 min, if the room has time).** *"And
-before Content Agent ever needs to clean anything up, here's how the
-writing itself happens."* Canvas is a separate, hosted, login-gated app —
-not part of this Next.js deployment — so switch to a second browser tab
-already logged into your Sanity account. Open a draft for one of the
-**Editorial Articles** and point at the writable surface: title, dek, body,
-and promo copy are configured as Canvas fields (`options.canvasApp` in
-`editorialArticle.ts`); structural fields — slug, cover image, the drop/
-product references, `needsReview` — are deliberately excluded, since
-they're not something a writer free-writes. Show the AI-assisted drafting
-experience, and if the document is linked, that the draft flows into the
-same Studio fields Content Agent was just auditing.
-
-**Setup is done** — the schema manifest is deployed and this studio is
-registered as an Application (see §3), which together fixed the two errors
-we hit getting here (schema-not-found, then "no application found"). What's
-still unverified is the actual Canvas writing/AI experience itself, since
-that needs your account and I can't click through it. Test it once, live,
-before you go on stage.
-
 Close by naming the bottom line out loud: *"Nine writers, unlimited scale."*
 Then hand off to Q&A.
 
@@ -485,12 +465,6 @@ Then hand off to Q&A.
 - **Applying an audit fix is a real, one-way mutation.** Re-running
   `npm run seed` resets the four editorial articles back to their seeded gaps
   if you want to demo the same check twice in rehearsal.
-- **Canvas is still the least-verified piece of this demo,** even with setup
-  done. It's a separate, login-gated hosted app I can't click through
-  myself — the schema manifest and app registration (see §3) are confirmed
-  correct, but the actual writing/AI experience inside Canvas hasn't been
-  tested end-to-end. If it misbehaves on stage, skip it; nothing else in the
-  script depends on it.
 - **Resetting mid-rehearsal.** If anything gets into a weird state, `npm run
   seed` puts both drops back to their scripted starting state in a few
   seconds.
