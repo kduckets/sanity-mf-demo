@@ -457,18 +457,6 @@ Then hand off to Q&A.
 
 ## Known fragile points (and how to rehearse around them)
 
-- **Three things the deck explicitly says not to say — easy to slip on live:**
-  1. **Don't imply merchandising edits price or availability inside Sanity.**
-     The PIM is the system of record; Sanity references it live. It's a
-     read/reference relationship, not a two-way sync — Sanity never writes
-     back to the PIM. Act 2's manual field edit stands in for the PIM's own
-     webhook push; say so explicitly (the script's aside there does this).
-  2. **Don't commit to a specific migration timeline** ("weeks, not months,"
-     or any other estimate). If pressed, redirect to the Next Steps slide's
-     2–3 week pilot environment instead of estimating live.
-  3. **Don't imply the "Notify wholesale" button (Act 3) sends a real
-     notification.** It's a placeholder dialog — a real integration would
-     post to a webhook or send an email from there, but this one doesn't.
 - **Live-panel timing.** The readiness panel and storefront both update within
   a couple of seconds via `client.listen()` / Sanity's Live Content API, not
   instantly. Narrate through the couple-second gap rather than clicking twice —
