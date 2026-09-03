@@ -66,10 +66,18 @@ Keep either in your back pocket as a fallback if live editing goes sideways
 mid-demo, and use them to show that the same model holds up across visually
 distinct labels in the portfolio, not just one.
 
-A separate set of seeded content powers the Act 4 piece (see below) and is
-kept fully apart from the three drops above, so re-seeding or editing it
-never touches the core Acts 1–3 flow:
+Two more sets of seeded content power the Engineering detour and Act 4
+pieces (see below) and are kept fully apart from the three drops above, so
+re-seeding or editing them never touches the core Acts 1–3 flow:
 
+- **Seven `product` documents** (`product-shopping-001`–`007`) dedicated to
+  the shopping assistant, with `category`/`color`/`materials`/
+  `availableSizes` populated. Only two — **Cove Blue Wool Crewneck** and
+  **Slate Blue Lambswool Sweater** — satisfy every constraint in the
+  canonical example query; the other five each fail exactly one constraint
+  on purpose, so a broader query (e.g. "wool sweaters") legitimately widens
+  the result set rather than everything showing up regardless of what's
+  asked.
 - **Four `editorialArticle` documents** — the magazine/lookbook/creator-content
   layer Use Case 4 is about. Three each carry one deliberate gap (missing alt
   text, a product reference to a nonexistent SKU, and stale "Coming soon" copy
@@ -175,6 +183,9 @@ CMS demo:
 - **`/drops/[slug]`** — a single capsule drop (editorial + linked products)
 - **`/about`** — brand story and a small stats strip ($650M / 6 labels / etc.)
 - **`/wholesale`** — wholesale positioning and contact
+- **`/shopping-assistant`** — a chat interface contrasting a fake similarity
+  search against a real Content Agent call turning free text into a GROQ
+  constraint query (Engineering detour, for engineering)
 - **`/preview/drops`** and **`/preview/drops/[slug]`** — the same pages, but
   reading unpublished draft content. A separate URL tree (not a cookie toggle
   on the same URL), so it's unambiguous in the address bar which one you're on
@@ -302,6 +313,27 @@ CMS demo:
   writing, requires a studio-connect step this embedded studio doesn't yet
   satisfy). Know the difference if asked; the underlying capability (real
   GROQ checks, real staged fixes) is genuine either way.
+- **Shopping assistant.** `/shopping-assistant`
+  (`src/app/(site)/shopping-assistant/`) is a chat interface, not a search
+  box — the point is specifically about a shopping *agent*, matching the
+  deck's own scenario. It opens with the canonical example already asked;
+  the first reply is a hardcoded, intentionally-wrong "similarity search"
+  bubble (never queried against real data, never responds to anything
+  typed — it's illustrating a failure mode). The second reply is real: free
+  text goes to Content Agent (`src/sanity/lib/agentSearch.ts` —
+  `client.agent.action.prompt()`, apiVersion `vX`), which extracts
+  structured filters as JSON, shown as "Understood as" chips, then a real
+  parameterized GROQ query runs them against a dedicated seeded catalog
+  (`product-shopping-*`). Falls back to the canonical example via a Server
+  Action if the call fails or times out (8s) — same reliability pattern as
+  Content Agent. **Gotcha if you edit the instruction text:** Sanity's agent
+  API treats any `$word` in the instruction as a template variable needing a
+  matching `instructionParams` key — a literal `$100` in the instruction
+  itself (not the user's message, which is safely passed via
+  `instructionParams`) will 400 every single call with "missing
+  instructionParams." Hit this exact bug once already; the comment in
+  `agentSearch.ts` flags it.
+
 ## Demo script (Act 1 / 2 / 3)
 
 **Before you start:** run `npm run seed`, run the app with `npm run build &&
@@ -398,21 +430,27 @@ GUI — quick look at what's actually driving it."* Switch to your editor:
   `*[_type == "product" && availabilityStatus == "sold_out"]` — a plain
   filter against real content, no query builder, no separate API per field.
 
-**Optional, spoken-only talking point — no live demo for this one.** If the
-room wants a concrete example of GROQ-as-constraint-system, the deck's own
-shopping-assistant scenario works as narration without touching the app:
-*"A customer asks for 'blue wool sweaters under $100 in size M.' A
-similarity-search chatbot returns a $400 cashmere coat, a blue cotton tee,
-and a wool scarf — all related, none matching. An agent built on Sanity
-doesn't search for similar — it writes a GROQ query: category, color,
-material, price, size, all as hard constraints. Every result matches every
-constraint."* *(There was previously a live `/search-demo` page built for
-this — it's been removed from the app. This is now narration only, matching
-how the deck itself frames it: "to use if the room wants a concrete
-example." Say if you'd rather it be rebuilt as a real demo again.)*
+**Shopping assistant (~1 min, if the room wants a concrete example).** Open
+`/shopping-assistant` — a chat interface, not a search box, since the point
+being made is specifically about a shopping *agent*. It opens with the
+deck's own example already asked: *"Show me blue wool sweaters under $100
+in size M."* The first reply is the wrong one on purpose — a hardcoded
+"similarity search" bubble returning a $640 cashmere coat, a $42 blue
+cotton tee, and a $96 wool scarf, labeled *"All related. None matching."*
+The second reply is real: a live Content Agent call turns the sentence into
+structured filters (shown as chips — "Understood as: category: sweater,
+color: blue, material: wool, price < $100, size: M"), and GROQ runs them
+as hard constraints, returning exactly two matches. Type a follow-up
+("wool sweaters") to show the chips narrow to just what was actually said,
+or a clearly off-topic one ("tell me a joke") to show it recognizes no
+catalog constraint instead of hallucinating one — same reliability pattern
+as Content Agent: a Server Action falls back to the canonical example if
+the live call fails, and the fake similarity bubble never responds to
+anything typed, on purpose.
 
-No fixed script here — you know this codebase, drive it live. Keep it
-tight; it's a detour, not a new act.
+No fixed script for the schema-as-code/GROQ half above — you know this
+codebase, drive it live. Keep the whole detour tight; it's a detour, not a
+new act.
 
 ### Act 4 — one more, for editorial
 
@@ -437,6 +475,18 @@ Then hand off to Q&A.
 
 ## Known fragile points (and how to rehearse around them)
 
+- **If you ever build before seeding (or reseed after building), a plain
+  rebuild won't fix it.** `/shopping-assistant` and the homepage/`/drops`
+  pages are statically prerendered, and Next.js persists its fetch cache in
+  `.next/cache` across builds — a build run before the catalog existed (or
+  before a content change) bakes in stale data, and `npm run build` again
+  reuses that cache instead of re-fetching. Hit this exact bug once: the
+  shopping assistant's opening exchange showed "no products match" even
+  though the query was correct, because it had first been built before
+  `npm run seed` populated the catalog. Fix: `rm -rf .next && npm run
+  build`. This is exactly why the documented order is seed first, build
+  second — if that order ever gets violated, a full cache clear is the only
+  fix, not just re-running build.
 - **Live-panel timing.** The readiness panel and storefront both update within
   a couple of seconds via `client.listen()` / Sanity's Live Content API, not
   instantly. Narrate through the couple-second gap rather than clicking twice —

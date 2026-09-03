@@ -78,6 +78,40 @@ export const CAPSULE_DROPS_QUERY = defineQuery(`
   }
 `)
 
+export interface ShoppingProduct {
+  _id: string
+  name: string
+  sku?: string
+  price?: number
+  color?: string
+  materials?: string[]
+  availableSizes?: string[]
+  image?: Image
+}
+
+// The canonical example from the deck — "blue wool sweaters under $100,
+// size M" — run server-side so the shopping assistant's opening exchange
+// has real results on first paint, no round trip needed just to load.
+export const SHOPPING_ASSISTANT_EXAMPLE_QUERY = defineQuery(`
+  *[
+    _type == "product" &&
+    category == "sweater" &&
+    color == "blue" &&
+    "wool" in materials &&
+    defined(price) && price < 100 &&
+    "M" in availableSizes
+  ]{
+    _id,
+    name,
+    sku,
+    price,
+    color,
+    materials,
+    availableSizes,
+    image
+  }
+`)
+
 export const CAPSULE_DROP_QUERY = defineQuery(`
   *[_type == "capsuleDrop" && slug.current == $slug][0]{
     _id,

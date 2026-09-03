@@ -5,6 +5,7 @@ export function SiteHeader({ dropsHref = "/drops" }: { dropsHref?: string }) {
     { href: dropsHref, label: "Drops" },
     { href: "/about", label: "About" },
     { href: "/wholesale", label: "Wholesale" },
+    { href: "/shopping-assistant", label: "Shopping assistant" },
   ];
 
   return (

@@ -231,6 +231,106 @@ const products = [
   },
 ];
 
+// Dedicated catalog for the shopping assistant demo (Use Case 2) — kept out
+// of `products` above and out of every capsule drop's product list, so it
+// never touches the Acts 1–3 flow. Two exact matches for "blue wool
+// sweaters under $100, size M"; the rest each fail exactly one constraint,
+// to make the contrast with the fake similarity answer legible. All carry
+// images — unlike a fixed single-query demo, the chatbot's free-text input
+// means broader questions ("wool sweaters") legitimately surface the
+// near-misses as real results.
+const shoppingProducts = [
+  {
+    _id: "product-shopping-001",
+    name: "Cove Blue Wool Crewneck",
+    sku: "SA-001",
+    price: 88,
+    availabilityStatus: "in_stock",
+    category: "sweater",
+    color: "blue",
+    materials: ["wool"],
+    availableSizes: ["S", "M", "L"],
+    image: WM("c/c4/Oceans_and_trees_Fair_Isle_pullover.jpg/1280px-Oceans_and_trees_Fair_Isle_pullover.jpg"),
+  },
+  {
+    _id: "product-shopping-002",
+    name: "Slate Blue Lambswool Sweater",
+    sku: "SA-002",
+    price: 96,
+    availabilityStatus: "in_stock",
+    category: "sweater",
+    color: "blue",
+    materials: ["wool", "lambswool"],
+    availableSizes: ["M", "L"],
+    image: WM("c/c4/Oceans_and_trees_Fair_Isle_pullover.jpg/1280px-Oceans_and_trees_Fair_Isle_pullover.jpg"),
+  },
+  {
+    _id: "product-shopping-003",
+    name: "Cove Blue Cotton Crewneck",
+    sku: "SA-003",
+    // Fails the material constraint (cotton, not wool).
+    price: 74,
+    availabilityStatus: "in_stock",
+    category: "sweater",
+    color: "blue",
+    materials: ["cotton"],
+    availableSizes: ["S", "M", "L"],
+    image: WM("c/c4/Oceans_and_trees_Fair_Isle_pullover.jpg/1280px-Oceans_and_trees_Fair_Isle_pullover.jpg"),
+  },
+  {
+    _id: "product-shopping-004",
+    name: "Amber Wool Crewneck",
+    sku: "SA-004",
+    // Fails the color constraint (amber, not blue).
+    price: 92,
+    availabilityStatus: "in_stock",
+    category: "sweater",
+    color: "amber",
+    materials: ["wool"],
+    availableSizes: ["M"],
+    image: WM("c/c4/Oceans_and_trees_Fair_Isle_pullover.jpg/1280px-Oceans_and_trees_Fair_Isle_pullover.jpg"),
+  },
+  {
+    _id: "product-shopping-005",
+    name: "Cove Blue Wool Sweater",
+    sku: "SA-005",
+    // Fails the price constraint (over $100).
+    price: 128,
+    availabilityStatus: "in_stock",
+    category: "sweater",
+    color: "blue",
+    materials: ["wool"],
+    availableSizes: ["M"],
+    image: WM("c/c4/Oceans_and_trees_Fair_Isle_pullover.jpg/1280px-Oceans_and_trees_Fair_Isle_pullover.jpg"),
+  },
+  {
+    _id: "product-shopping-006",
+    name: "Cove Blue Wool Pullover",
+    sku: "SA-006",
+    // Fails the size/stock constraint (no M in stock).
+    price: 84,
+    availabilityStatus: "in_stock",
+    category: "sweater",
+    color: "blue",
+    materials: ["wool"],
+    availableSizes: ["S", "L"],
+    image: WM("c/c4/Oceans_and_trees_Fair_Isle_pullover.jpg/1280px-Oceans_and_trees_Fair_Isle_pullover.jpg"),
+  },
+  {
+    _id: "product-shopping-007",
+    name: "Cove Blue Wool Scarf",
+    sku: "SA-007",
+    // Fails the category constraint (scarf, not sweater).
+    price: 68,
+    availabilityStatus: "in_stock",
+    category: "scarf",
+    color: "blue",
+    materials: ["wool"],
+    availableSizes: [],
+    image: WM("d/d3/CashScarf.JPG/1280px-CashScarf.JPG"),
+  },
+];
+
 // Editorial/magazine content (Use Case 4) — deliberately separate from the
 // three capsule drops' own `editorialStory` field. Each article carries at
 // most one intentional gap for the audit panel to find; one is left clean as
@@ -419,10 +519,17 @@ async function seedProducts(list) {
       lastPimEventAt: new Date().toISOString(),
       pimEventId: `evt_${randomKey()}`,
     };
-    const image = await uploadImageFromUrl(product._id, product.image, `${product.sku}.jpg`);
-    doc.image = imageField(image);
+    // Shopping-assistant non-matches skip an image — they're only ever queried, never rendered.
+    if (product.image) {
+      const image = await uploadImageFromUrl(product._id, product.image, `${product.sku}.jpg`);
+      doc.image = imageField(image);
+    }
     if (product.price !== undefined) doc.price = product.price;
     if (product.previousPrice !== undefined) doc.previousPrice = product.previousPrice;
+    if (product.category !== undefined) doc.category = product.category;
+    if (product.color !== undefined) doc.color = product.color;
+    if (product.materials !== undefined) doc.materials = product.materials;
+    if (product.availableSizes !== undefined) doc.availableSizes = product.availableSizes;
 
     await discardDraft(product._id);
     await client.createOrReplace(doc);
@@ -506,7 +613,7 @@ async function seedDrops() {
 }
 
 try {
-  await seedProducts(products);
+  await seedProducts([...products, ...shoppingProducts]);
   await seedDrops();
   await seedEditorialArticles();
   console.log("\nDone. Two products are deliberately not-ready:");
@@ -519,6 +626,10 @@ try {
     "\nThree editorial articles carry a deliberate gap for Content Agent\n" +
       '(Studio → "Content Agent"): missing alt text, a broken product link,\n' +
       "and stale promo copy on the Golden Hour restock piece. A fourth is clean.",
+  );
+  console.log(
+    '\n"Cove Blue Wool Crewneck" and "Slate Blue Lambswool Sweater" are the\n' +
+      "only exact matches for the /shopping-assistant example query.",
   );
   console.log("\nImage sources (Wikimedia Commons, freely licensed):");
   console.log(credits.join("\n"));
