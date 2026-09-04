@@ -13,6 +13,7 @@
   "dependencies": {
     "@portabletext/react": "^8.0.1",
     "@sanity/client": "^8.3.0",
+    "@sanity/dashboard": "^6.0.18",
     "@sanity/icons": "^5.2.1",
     "@sanity/image-url": "^2.1.1",
     "@sanity/vision": "^6.11.0",

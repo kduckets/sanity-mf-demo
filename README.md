@@ -189,17 +189,36 @@ CMS demo:
 - **`/preview/drops`** and **`/preview/drops/[slug]`** — the same pages, but
   reading unpublished draft content. A separate URL tree (not a cookie toggle
   on the same URL), so it's unambiguous in the address bar which one you're on
-- **`/studio`** — the Sanity Studio, embedded in the same app, including a
-  **Presentation** tool tab that iframes the `/preview/*` pages for
-  click-to-edit and drag-and-drop reordering (see below), an **Editorial
-  Articles** document list, and a **Content Agent** custom pane (Act 4, for
-  editorial — see below)
+- **`/studio`** — the Sanity Studio, embedded in the same app, including an
+  **Overview** dashboard tab (a merchandiser-facing launch readiness board —
+  see below), a **Presentation** tool tab that iframes the `/preview/*`
+  pages for click-to-edit and drag-and-drop reordering (see below), an
+  **Editorial Articles** document list, and a **Content Agent** custom pane
+  (Act 4, for editorial — see below)
 
 ## How it works
 
 - **One content model.** `capsuleDrop` holds the editorial story and references
   to `product` documents. `product` stands in for what a legacy PIM would feed
   in. See `src/sanity/schemaTypes/`.
+- **Launch readiness dashboard, for the merchandiser.** Studio's **Overview**
+  tab (`@sanity/dashboard`, configured in `sanity.config.ts`, custom widget
+  at `src/sanity/components/LaunchReadinessWidget.tsx`) is a single-screen
+  rollup across all three drops: readiness status (reusing the exact same
+  `computeReadiness` logic that blocks Publish — never a separate
+  approximation that could disagree with it), the specific blocking issues
+  named per drop, and every `editorialArticle` that links back to it via a
+  correlated GROQ subquery (`*[_type == "editorialArticle" &&
+  relatedDrop._ref == ^._id]`), flagging any that Content Agent marked
+  `needsReview`. Drop titles and article titles are real `IntentLink`s that
+  jump straight to editing that document. Live-updating via three broad
+  `client.listen()` subscriptions (capsuleDrop/product/editorialArticle) —
+  fix a product in one tab and the board updates in another, same mechanism
+  as the per-drop readiness panel, just aggregated across every drop instead
+  of one. This is a genuinely separate Studio *tool* (`@sanity/dashboard`'s
+  `dashboardTool`), not the external Sanity dashboard Canvas and the
+  org-level Content Agent live in — no login gate, no app registration,
+  just a plugin.
 - **The PIM connection is a webhook triggering a real mutation, not a batch
   job.** The intended production shape — and the reason `product`'s fields
   are named the way they are — is: the PIM fires a webhook on every price or
@@ -355,6 +374,12 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
    and product list together, on a site that looks like the rest of
    marloweandfinch.com — this is the customer-facing result of that one
    document.
+3. **[Optional]** Click Studio's **Overview** tab — the merchandiser's view
+   of all three drops at once: readiness, blocking issues by name, and which
+   editorial coverage exists for each, without opening a single document.
+   Skip it here if you'd rather save it for Act 2's resolution (watching
+   Autumn Reverie flip from red to green on this same board is a stronger
+   moment than seeing it cold).
 
 ### Act 2 — the readiness block (the key moment)
 
@@ -387,7 +412,9 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
    update live: one issue left (the missing price).
 5. Open **Umber Wide-Leg Trouser**, add a price (e.g. `238`), let it autosave.
 6. Switch back to the drop tab again: readiness flips to green, **Ready to
-   publish**.
+   publish**. *(If you saved the Overview tab for here instead of Act 1:
+   switch to it now and point at Autumn Reverie's card flipping from red to
+   green live, same `client.listen()` update as the readiness panel.)*
 7. Switch to the **preview** tab (`/preview/drops/...`): the same two products
    update from "Pending" / "Price unavailable" to in-stock with a real price —
    within a couple of seconds, live, no redeploy, no click-through publish.

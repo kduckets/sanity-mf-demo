@@ -359,6 +359,7 @@ const editorialArticles = [
     dek: "A morning in the studio where Autumn Reverie started as a sketch on a gig poster.",
     coverImage: WM("7/71/Forest_path_through_yellow_autumn_leaves_in_Tuntorp_1.jpg/1280px-Forest_path_through_yellow_autumn_leaves_in_Tuntorp_1.jpg"),
     coverImageAlt: "Wilder Row's studio workspace",
+    relatedDropId: "capsule-drop-autumn-reverie",
     // Points at a product id that doesn't exist — the "broken product link" gap.
     relatedProductId: "product-av-wr-999",
     weeklyViews: 1900,

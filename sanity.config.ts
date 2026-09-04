@@ -1,10 +1,13 @@
 'use client'
 
+import { DashboardIcon } from '@sanity/icons/Dashboard'
 import { visionTool } from '@sanity/vision'
+import { dashboardTool } from '@sanity/dashboard'
 import { defineConfig } from 'sanity'
 import { defineDocuments, defineLocations, presentationTool } from 'sanity/presentation'
 import { structureTool } from 'sanity/structure'
 
+import { LaunchReadinessWidget } from '@/sanity/components/LaunchReadinessWidget'
 import { NotifyWholesaleAction } from '@/sanity/components/NotifyWholesaleAction'
 import { apiVersion, dataset, projectId } from '@/sanity/env'
 import { schema } from '@/sanity/schemaTypes'
@@ -24,6 +27,17 @@ export default defineConfig({
         : prev,
   },
   plugins: [
+    dashboardTool({
+      title: 'Overview',
+      icon: DashboardIcon,
+      widgets: [
+        {
+          name: 'launch-readiness',
+          component: LaunchReadinessWidget,
+          layout: { width: 'full' },
+        },
+      ],
+    }),
     structureTool({ structure }),
     presentationTool({
       previewUrl: {
