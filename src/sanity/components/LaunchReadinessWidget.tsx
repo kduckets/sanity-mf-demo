@@ -36,8 +36,20 @@ const OVERVIEW_QUERY = `*[_type == "capsuleDrop" && defined(slug.current)] | ord
   "articles": *[_type == "editorialArticle" && relatedDrop._ref == ^._id]{_id, title, needsReview}
 }`
 
+// These cards deliberately opt out of Studio's ambient theme — they're
+// always a light, paper-like surface with dark text, in both light and
+// dark Studio. That's a choice, not an oversight: every color below is
+// explicit for that reason. Reaching for a Studio CSS var (--card-fg-color
+// and friends) here would be wrong, not just inconsistent — those resolve
+// to a *light* color in dark Studio, meant to sit on a *dark* card, and
+// would go near-invisible against this widget's light background.
+const READY = { border: '#bfe3cd', bg: '#f3faf6', badgeFg: '#1f6f43', badgeBg: '#e2f3e8' }
+const NOT_READY = { border: '#f0c9c3', bg: '#fdf3f2', badgeFg: '#8a2620', badgeBg: '#fbe2df' }
+const INK = '#1c1a17'
+const MUTED = '#6b6459'
+
 const linkStyle: React.CSSProperties = {
-  color: 'inherit',
+  color: INK,
   textDecoration: 'none',
 }
 
@@ -107,78 +119,89 @@ export function LaunchReadinessWidget() {
           {reviewCount > 0 && (
             <>
               {' · '}
-              <strong style={{ color: '#8a2620' }}>{reviewCount}</strong> article
+              <strong style={{ color: 'var(--card-fg-color, #1a1a1a)' }}>{reviewCount}</strong> article
               {reviewCount === 1 ? '' : 's'} flagged for review
             </>
           )}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {rows.map(({ drop, readiness }) => (
-            <div
-              key={drop._id}
-              style={{
-                border: `1px solid ${readiness.ready ? '#bfe3cd' : '#f0c9c3'}`,
-                background: readiness.ready ? '#f3faf6' : '#fdf3f2',
-                borderRadius: 8,
-                padding: '10px 14px',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
-                <IntentLink intent="edit" params={{ id: drop._id, type: 'capsuleDrop' }} style={linkStyle}>
-                  <span style={{ fontWeight: 600, fontSize: 14 }}>{drop.title}</span>
-                </IntentLink>
-                <span
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {rows.map(({ drop, readiness }) => {
+            const tone = readiness.ready ? READY : NOT_READY
+            return (
+              <div
+                key={drop._id}
+                style={{
+                  border: `1px solid ${tone.border}`,
+                  background: tone.bg,
+                  borderRadius: 10,
+                  padding: '14px 16px',
+                  boxShadow: '0 1px 2px rgba(28, 26, 23, 0.04)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
+                  <IntentLink intent="edit" params={{ id: drop._id, type: 'capsuleDrop' }} style={linkStyle}>
+                    <span style={{ fontWeight: 600, fontSize: 15 }}>{drop.title}</span>
+                  </IntentLink>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      padding: '3px 9px',
+                      borderRadius: 999,
+                      color: tone.badgeFg,
+                      background: tone.badgeBg,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {readiness.ready ? 'READY' : `${readiness.issues.length} ISSUE${readiness.issues.length === 1 ? '' : 'S'}`}
+                  </span>
+                </div>
+
+                <div style={{ marginTop: 3, fontSize: 12.5, color: MUTED }}>
+                  {drop.creatorCollaborator && <>x {drop.creatorCollaborator} · </>}
+                  {formatLaunchDate(drop.launchDate)}
+                </div>
+
+                {!readiness.ready && (
+                  <ul style={{ margin: '10px 0 0', paddingLeft: 18, fontSize: 13, color: NOT_READY.badgeFg, lineHeight: 1.6 }}>
+                    {readiness.issues.map((issue, i) => (
+                      <li key={`${issue.productId}-${issue.field}-${i}`}>{issue.message}</li>
+                    ))}
+                  </ul>
+                )}
+
+                <div
                   style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    padding: '2px 8px',
-                    borderRadius: 999,
-                    color: readiness.ready ? '#1f6f43' : '#8a2620',
-                    background: readiness.ready ? '#e2f3e8' : '#fbe2df',
-                    whiteSpace: 'nowrap',
+                    marginTop: 10,
+                    paddingTop: 10,
+                    borderTop: `1px solid ${tone.border}`,
+                    fontSize: 13,
                   }}
                 >
-                  {readiness.ready ? 'Ready' : `${readiness.issues.length} issue${readiness.issues.length === 1 ? '' : 's'}`}
-                </span>
+                  {drop.articles.length === 0 ? (
+                    <span style={{ color: MUTED, fontStyle: 'italic' }}>No editorial coverage yet</span>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {drop.articles.map((article) => (
+                        <IntentLink
+                          key={article._id}
+                          intent="edit"
+                          params={{ id: article._id, type: 'editorialArticle' }}
+                          style={linkStyle}
+                        >
+                          📄 {article.title}
+                          {article.needsReview && (
+                            <span style={{ color: NOT_READY.badgeFg, fontWeight: 600 }}> — needs review</span>
+                          )}
+                        </IntentLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-
-              <div style={{ marginTop: 2, fontSize: 12, color: 'var(--card-muted-fg-color, #666)' }}>
-                {drop.creatorCollaborator && <>x {drop.creatorCollaborator} · </>}
-                {formatLaunchDate(drop.launchDate)}
-              </div>
-
-              {!readiness.ready && (
-                <ul style={{ margin: '8px 0 0', paddingLeft: 16, fontSize: 12.5, color: '#8a2620' }}>
-                  {readiness.issues.map((issue, i) => (
-                    <li key={`${issue.productId}-${issue.field}-${i}`}>{issue.message}</li>
-                  ))}
-                </ul>
-              )}
-
-              <div style={{ marginTop: 8, fontSize: 12.5 }}>
-                {drop.articles.length === 0 ? (
-                  <span style={{ color: 'var(--card-muted-fg-color, #999)' }}>No editorial coverage yet</span>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {drop.articles.map((article) => (
-                      <IntentLink
-                        key={article._id}
-                        intent="edit"
-                        params={{ id: article._id, type: 'editorialArticle' }}
-                        style={linkStyle}
-                      >
-                        📄 {article.title}
-                        {article.needsReview && (
-                          <span style={{ color: '#8a2620', fontWeight: 600 }}> — needs review</span>
-                        )}
-                      </IntentLink>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </DashboardWidgetContainer>
