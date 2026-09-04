@@ -53,6 +53,15 @@ const linkStyle: React.CSSProperties = {
   textDecoration: 'none',
 }
 
+const sectionLabelStyle: React.CSSProperties = {
+  fontSize: 10.5,
+  fontWeight: 700,
+  letterSpacing: '0.07em',
+  textTransform: 'uppercase',
+  color: MUTED,
+  marginBottom: 5,
+}
+
 function formatLaunchDate(iso?: string) {
   if (!iso) return null
   return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
@@ -163,26 +172,37 @@ export function LaunchReadinessWidget() {
                   {formatLaunchDate(drop.launchDate)}
                 </div>
 
-                {!readiness.ready && (
-                  <ul style={{ margin: '10px 0 0', paddingLeft: 18, fontSize: 13, color: NOT_READY.badgeFg, lineHeight: 1.6 }}>
-                    {readiness.issues.map((issue, i) => (
-                      <li key={`${issue.productId}-${issue.field}-${i}`}>{issue.message}</li>
-                    ))}
-                  </ul>
-                )}
+                <div style={{ marginTop: 12 }}>
+                  <div style={sectionLabelStyle}>
+                    🏷️ Products · {drop.products.length}
+                  </div>
+                  {readiness.ready ? (
+                    <div style={{ fontSize: 13, color: READY.badgeFg }}>
+                      All {drop.products.length} confirmed ready — priced and in stock.
+                    </div>
+                  ) : (
+                    <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: NOT_READY.badgeFg, lineHeight: 1.6 }}>
+                      {readiness.issues.map((issue, i) => (
+                        <li key={`${issue.productId}-${issue.field}-${i}`}>{issue.message}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
 
                 <div
                   style={{
-                    marginTop: 10,
+                    marginTop: 12,
                     paddingTop: 10,
                     borderTop: `1px solid ${tone.border}`,
-                    fontSize: 13,
                   }}
                 >
+                  <div style={sectionLabelStyle}>
+                    📄 Editorial · {drop.articles.length}
+                  </div>
                   {drop.articles.length === 0 ? (
-                    <span style={{ color: MUTED, fontStyle: 'italic' }}>No editorial coverage yet</span>
+                    <span style={{ fontSize: 13, color: MUTED, fontStyle: 'italic' }}>No editorial coverage yet</span>
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 13 }}>
                       {drop.articles.map((article) => (
                         <IntentLink
                           key={article._id}
@@ -190,7 +210,7 @@ export function LaunchReadinessWidget() {
                           params={{ id: article._id, type: 'editorialArticle' }}
                           style={linkStyle}
                         >
-                          📄 {article.title}
+                          {article.title}
                           {article.needsReview && (
                             <span style={{ color: NOT_READY.badgeFg, fontWeight: 600 }}> — needs review</span>
                           )}
