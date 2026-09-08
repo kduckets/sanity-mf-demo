@@ -66,8 +66,8 @@ Keep either in your back pocket as a fallback if live editing goes sideways
 mid-demo, and use them to show that the same model holds up across visually
 distinct labels in the portfolio, not just one.
 
-Two more sets of seeded content power the Engineering detour and Act 4
-pieces (see below) and are kept fully apart from the three drops above, so
+Two more sets of seeded content power the "Automate, deep dive" pieces
+(see below) and are kept fully apart from the three drops above, so
 re-seeding or editing them never touches the core Acts 1–3 flow:
 
 - **Seven `product` documents** (`product-shopping-001`–`007`) dedicated to
@@ -79,7 +79,7 @@ re-seeding or editing them never touches the core Acts 1–3 flow:
   the result set rather than everything showing up regardless of what's
   asked.
 - **Four `editorialArticle` documents** — the magazine/lookbook/creator-content
-  layer Use Case 4 is about. Three each carry one deliberate gap (missing alt
+  layer Content Agent audits. Three each carry one deliberate gap (missing alt
   text, a product reference to a nonexistent SKU, and stale "Coming soon" copy
   on the already-published Golden Hour restock piece); the fourth is clean, so
   the audit panel doesn't read as flagging everything indiscriminately.
@@ -185,7 +185,7 @@ CMS demo:
 - **`/wholesale`** — wholesale positioning and contact
 - **`/shopping-assistant`** — a chat interface contrasting a fake similarity
   search against a real Content Agent call turning free text into a GROQ
-  constraint query (Engineering detour, for engineering)
+  constraint query ("Automate, deep dive," Use Case 2, for engineering)
 - **`/preview/drops`** and **`/preview/drops/[slug]`** — the same pages, but
   reading unpublished draft content. A separate URL tree (not a cookie toggle
   on the same URL), so it's unambiguous in the address bar which one you're on
@@ -194,7 +194,7 @@ CMS demo:
   see below), a **Presentation** tool tab that iframes the `/preview/*`
   pages for click-to-edit and drag-and-drop reordering (see below), an
   **Editorial Articles** document list, and a **Content Agent** custom pane
-  (Act 4, for editorial — see below)
+  (Use Case 2's "Automate, deep dive" section — see below)
 
 ## How it works
 
@@ -326,7 +326,9 @@ CMS demo:
   than pretending to parse it. This is deliberately reliable-over-clever: no
   external LLM call to fail
   live on stage. **Naming note:** this pane is labeled "Content Agent" to
-  match the deck's Use Case 4 language, but it's a custom Structure Tool
+  match the deck's Use Case 2 language (Content Agent's permanent home —
+  the standalone editorial use case that originally introduced it was cut),
+  but it's a custom Structure Tool
   pane calling Agent Actions directly — not Sanity's own hosted, org-level
   Content Agent product (which lives in the Sanity dashboard and, as of this
   writing, requires a studio-connect step this embedded studio doesn't yet
@@ -361,7 +363,11 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
 `/drops/autumn-reverie-x-wilder-row`, and the preview of the same drop at
 `/preview/drops/autumn-reverie-x-wilder-row`.
 
-### Act 1 — one shared model
+### Act 1 — Structure: one shared model
+
+Opening line, before touching anything: *"Think of content operations like
+an orchestra, and Sanity as the conductor."* — the deck's own framing for
+this use case; worth saying before you even open Studio.
 
 1. In Studio, open **Capsule Drops → Autumn Reverie x Wilder Row**. Point out
    that the editorial story and the six linked products live in the same
@@ -370,6 +376,11 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
    the point isn't that it goes away, it's that its data now lands here
    automatically instead of three teams re-entering it into WordPress,
    Contentful, and a PIM export by hand.)*
+   **If a technical stakeholder pushes back** on why this is more than a
+   nicer WordPress: most CMSs, Contentful included, are document-oriented —
+   filling in fields on a page-like entry. This models content like data in
+   a database — real relationships, types, and a query layer on top. That's
+   the root architectural bet everything else in the demo is proving.
 2. Switch to the public storefront tab. Show the drop page rendering the story
    and product list together, on a site that looks like the rest of
    marloweandfinch.com — this is the customer-facing result of that one
@@ -381,7 +392,7 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
    Autumn Reverie flip from red to green on this same board is a stronger
    moment than seeing it cold).
 
-### Act 2 — the readiness block (the key moment)
+### Act 2 — Automate & Power: the readiness block (the key moment)
 
 1. Back in Studio, scroll to the **Readiness** field on the drop document. It's
    already red: *"Umber Wide-Leg Trouser" is missing a price* and *"Copper Knit
@@ -425,7 +436,7 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
    That gap — draft vs. published — is exactly the coordination point the
    prospect's batch-synced stack couldn't give them.
 
-### Act 3 — publish
+### Act 3 — Power: publish
 
 1. Back in Studio, click **Publish**. It goes through this time.
 2. Point at the new **Notify wholesale** button, now enabled since the drop
@@ -437,7 +448,11 @@ browser tabs side by side — `/studio` (logged in), the public drop page at
 3. Switch to the public storefront tab and refresh: now shows the resolved,
    in-stock, correctly-priced page — no preview mode needed anymore.
 
-### Engineering detour — schema-as-code & GROQ (~1–2 min, optional, Use Case 2)
+### Automate, deep dive — schema-as-code, GROQ & Content Agent (~4–5 min, optional, Use Case 2)
+
+Bridge line: *"That's structure and power, proven live. One more thread
+worth a few minutes — automate, all the way through: the migration, the
+queries, and the agents built on top of them."*
 
 For the engineers in the room specifically, right where their attention is
 already highest. *"Since none of what you just watched is a proprietary
@@ -448,8 +463,10 @@ GUI — quick look at what's actually driving it."* Switch to your editor:
   validation rule that just blocked Publish, is plain version-controlled
   TypeScript (`defineType`/`defineField`), not config buried in a GUI. *"This
   is also how the WordPress migration itself runs — schema defined and
-  versioned as code, shipping incrementally, not one big cutover."* (Don't
-  attach a timeline to this — see the caution below.)
+  versioned as code, shipping incrementally, not one big cutover."* **Don't
+  attach a timeline to this** ("weeks, not months," or any other estimate) —
+  the deck deliberately avoids stating one. If pressed, redirect to the Next
+  Steps slide's pilot environment instead of estimating live.
 - **GROQ:** open `src/sanity/lib/queries.ts` and show `CAPSULE_DROP_QUERY` —
   one query dereferencing the drop's editorial story and every linked
   product's live price/availability in a single round trip. Or run
@@ -457,47 +474,45 @@ GUI — quick look at what's actually driving it."* Switch to your editor:
   `*[_type == "product" && availabilityStatus == "sold_out"]` — a plain
   filter against real content, no query builder, no separate API per field.
 
-**Shopping assistant (~1 min, if the room wants a concrete example).** Open
-`/shopping-assistant` — a chat interface, not a search box, since the point
-being made is specifically about a shopping *agent*. It opens with the
-deck's own example already asked: *"Show me blue wool sweaters under $100
-in size M."* The first reply is the wrong one on purpose — a hardcoded
-"similarity search" bubble returning a $640 cashmere coat, a $42 blue
-cotton tee, and a $96 wool scarf, labeled *"All related. None matching."*
-The second reply is real: a live Content Agent call turns the sentence into
-structured filters (shown as chips — "Understood as: category: sweater,
-color: blue, material: wool, price < $100, size: M"), and GROQ runs them
-as hard constraints, returning exactly two matches. Type a follow-up
-("wool sweaters") to show the chips narrow to just what was actually said,
-or a clearly off-topic one ("tell me a joke") to show it recognizes no
-catalog constraint instead of hallucinating one — same reliability pattern
-as Content Agent: a Server Action falls back to the canonical example if
-the live call fails, and the fake similarity bubble never responds to
-anything typed, on purpose.
+**The pivot line into both of the next two pieces:** *"GROQ shapes results
+for any channel — including AI. Agents actually work reliably because they
+need structured, addressable data to act on safely. What you're about to
+see isn't reaching over a blob of HTML guessing at meaning — it's operating
+on typed fields with real constraints."* Two proofs of that, back to back:
+
+**Shopping assistant (~1 min).** Open `/shopping-assistant` — a chat
+interface, not a search box, since the point is specifically about a
+shopping *agent*. It opens with the deck's own example already asked:
+*"Show me blue wool sweaters under $100 in size M."* The first reply is the
+wrong one on purpose — a hardcoded "similarity search" bubble returning a
+$640 cashmere coat, a $42 blue cotton tee, and a $96 wool scarf, labeled
+*"All related. None matching."* The second reply is real: a live Content
+Agent call turns the sentence into structured filters (shown as chips —
+"Understood as: category: sweater, color: blue, material: wool, price <
+$100, size: M"), and GROQ runs them as hard constraints, returning exactly
+two matches. Type a follow-up ("wool sweaters") to show the chips narrow to
+just what was actually said, or a clearly off-topic one ("tell me a joke")
+to show it recognizes no catalog constraint instead of hallucinating one.
+
+**Content Agent (~1–2 min).** In Studio, open **Content Agent**. *"Same
+idea, aimed at editorial ops instead of a shopper's question — bulk edits,
+content audits, and gap analysis, through conversation."* Click a few of
+the example prompts — missing alt text, a broken product link, and stale
+promo copy on the Golden Hour restock piece all surface as real, staged
+findings. If time allows, show one of each flavor named in the deck: the
+**bulk edit** prompt (batch-fills promo copy across every article missing
+one in a single Apply) and the **gap-analysis** prompt (the one high-traffic
+article with no product link for readers to shop). Check a couple of boxes
+and click **Apply**; the panel re-runs the check and the fixed items drop
+off the list. Open the affected article in **Editorial Articles** afterward
+if you want to show the write actually landed.
 
 No fixed script for the schema-as-code/GROQ half above — you know this
-codebase, drive it live. Keep the whole detour tight; it's a detour, not a
-new act.
+codebase, drive it live.
 
-### Act 4 — one more, for editorial
-
-Bridge line: *"That's the launch-day story. One more thing worth a couple
-minutes, since it maps to a specific role in this room."*
-
-**Editorial — Content Agent (~1–2 min).** *"And this one's for editorial —
-with nine writers covering fourteen drops a year, this is where that
-scales."* In Studio, open **Content Agent**. Click a few of the example
-prompts — missing alt text, a broken product link, and stale promo copy on
-the Golden Hour restock piece all surface as real, staged findings. If time
-allows, show one of each flavor named in the deck: the **bulk edit** prompt
-(batch-fills promo copy across every article missing one in a single Apply)
-and the **gap-analysis** prompt (the one high-traffic article with no
-product link for readers to shop). Check a couple of boxes and click
-**Apply**; the panel re-runs the check and the fixed items drop off the
-list. Open the affected article in **Editorial Articles** afterward if you
-want to show the write actually landed.
-
-Close by naming the bottom line out loud: *"Nine writers, unlimited scale."*
+Close by tying the thread together out loud: *"Structure, automate,
+power — same idea, three proofs. Collaboration that scales with every
+drop. Data accuracy, without the wait. Every launch, guaranteed ready."*
 Then hand off to Q&A.
 
 ## Known fragile points (and how to rehearse around them)
