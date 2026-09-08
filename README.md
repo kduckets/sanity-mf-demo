@@ -493,6 +493,9 @@ $100, size: M"), and GROQ runs them as hard constraints, returning exactly
 two matches. Type a follow-up ("wool sweaters") to show the chips narrow to
 just what was actually said, or a clearly off-topic one ("tell me a joke")
 to show it recognizes no catalog constraint instead of hallucinating one.
+*"Every result matches every constraint — because it's a filter, not a
+guess. Same data accuracy the room just watched in Act 2, now proven for
+AI."*
 
 **Content Agent (~1–2 min).** In Studio, open **Content Agent**. *"Same
 idea, aimed at editorial ops instead of a shopper's question — bulk edits,
