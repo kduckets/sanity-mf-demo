@@ -2,6 +2,7 @@ import { SparklesIcon } from '@sanity/icons/Sparkles'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { apiVersion } from '@/sanity/env'
+import { ArticlesBacklinkInput } from '@/sanity/components/ArticlesBacklinkInput'
 import { ReadinessStatusInput } from '@/sanity/components/ReadinessStatusInput'
 import { PublishedStateInput } from '@/sanity/components/PublishedStateInput'
 import { computeReadiness, type ReadinessProduct } from '@/sanity/lib/readiness'
@@ -66,6 +67,17 @@ export const capsuleDrop = defineType({
       type: 'array',
       of: [defineArrayMember({ type: 'reference', to: [{ type: 'product' }] })],
       validation: (Rule) => Rule.required().min(1),
+    }),
+    defineField({
+      name: 'articles',
+      title: 'Articles',
+      description:
+        'The other direction of the editorialArticle → capsuleDrop link: any article whose ' +
+        '"Related capsule drop" points here. Computed live from that reference, not a separate ' +
+        'list to maintain — set the link on the article, not here.',
+      type: 'string',
+      readOnly: true,
+      components: { input: ArticlesBacklinkInput },
     }),
     defineField({
       name: 'readinessStatus',
