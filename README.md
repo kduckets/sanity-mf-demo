@@ -60,6 +60,15 @@ not-ready products:
 - **Umber Wide-Leg Trouser** (`AV-WR-005`) — missing a price
 - **Copper Knit Vest** (`AV-WR-006`) — `availabilityStatus: pending`
 
+Because of that, Autumn Reverie itself seeds as a **draft** — visible and
+editable in Studio and in `/preview/drops/...`, but never published — so the
+live site never shows an unready drop. That's the point being demonstrated,
+not a bug: fix the two products and publish it for real to complete Act 2/3.
+Its editorial companion, **"Wilder Row Studio Visit"** (`/magazine/...`),
+still publishes normally — its link back to the drop (`relatedDrop`) is a
+weak reference, so it simply shows no "Shop the drop" section until Autumn
+Reverie actually goes live.
+
 The other two — **"Golden Hour x Marlowe Studio"** and **"Peaceable Kingdom x
 Dana Vela"** (Slow Fauna, the label's boho-streetwear line) — are fully ready.
 Keep either in your back pocket as a fallback if live editing goes sideways
@@ -367,7 +376,10 @@ CMS demo:
 npm run start` (see [§4](#4-run-it) for why not `dev`), then open three
 browser tabs side by side — `/studio` (logged in), the public drop page at
 `/drops/autumn-reverie-x-wilder-row`, and the preview of the same drop at
-`/preview/drops/autumn-reverie-x-wilder-row`.
+`/preview/drops/autumn-reverie-x-wilder-row`. **The public tab will 404 at
+the start** — Autumn Reverie seeds as a draft on purpose (see [§3](#3-install-and-seed)),
+so there's nothing live yet to show. That's not a setup error to fix before
+you go on; it's the opening beat of Act 1.
 
 ### Act 1 — Structure: one shared model
 
@@ -387,10 +399,14 @@ this use case; worth saying before you even open Studio.
    filling in fields on a page-like entry. This models content like data in
    a database — real relationships, types, and a query layer on top. That's
    the root architectural bet everything else in the demo is proving.
-2. Switch to the public storefront tab. Show the drop page rendering the story
-   and product list together, on a site that looks like the rest of
-   marloweandfinch.com — this is the customer-facing result of that one
-   document.
+2. Switch to the public storefront tab: 404. *"This drop doesn't have a live
+   page yet — and it shouldn't, because two of its six products aren't
+   ready. That's the gap we're about to close."* Then a quick detour to
+   `/drops/golden-hour-x-marlowe-studio` (or just `/drops`) to show what the
+   *same* document model looks like once it's actually live — story and
+   product list together, on a site that looks like the rest of
+   marloweandfinch.com — before switching back to the still-404 Autumn
+   Reverie tab to set up Act 2.
 3. **[Optional]** Click Studio's **Overview** tab — the merchandiser's view
    of all three drops at once: readiness, blocking issues by name, and which
    editorial coverage exists for each, without opening a single document.
@@ -438,9 +454,12 @@ this use case; worth saying before you even open Studio.
    Point at the URL bar and the standing amber banner — this is a distinctly
    different address than the public site, which is what a stakeholder
    previewing the change would see before it's live to customers.
-8. Switch to the **public** tab and refresh: still shows the old, stale data.
-   That gap — draft vs. published — is exactly the coordination point the
-   prospect's batch-synced stack couldn't give them.
+8. Switch to the **public** tab and refresh: still 404 — nothing's live yet,
+   even though the draft is now fully ready. Publishing is still a deliberate
+   step, not automatic. That gap — draft vs. published — is exactly the
+   coordination point the prospect's batch-synced stack couldn't give them:
+   their system would have let the unready version go live the moment
+   someone entered a price, no separate gate at all.
 
 ### Act 3 — Power: publish
 
@@ -543,7 +562,7 @@ Then hand off to Q&A.
   instantly. Narrate through the couple-second gap rather than clicking twice —
   don't undersell it as literally instant.
 - **Three-tab setup.** The "fix it in Studio, watch it clear in the readiness
-  panel, watch preview update while public stays stale" beat depends on all
+  panel, watch preview update while public stays 404" beat depends on all
   three tabs (Studio, public, preview) staying open. Open and arrange all
   three before you start talking, not mid-sentence.
 - **Preview and public are different URLs, not a toggle.** If a tab is

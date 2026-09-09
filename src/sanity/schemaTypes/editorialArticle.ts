@@ -95,6 +95,11 @@ export const editorialArticle = defineType({
       title: 'Related capsule drop',
       type: 'reference',
       to: [{ type: 'capsuleDrop' }],
+      weak: true,
+      description:
+        'Weak reference — an article can cover a drop before that drop is ready to publish. If the ' +
+        'drop has no published version yet (or is later removed), this resolves to nothing on the ' +
+        'live site rather than blocking either document from publishing independently.',
       options: { canvasApp: { exclude: true } },
     }),
     defineField({

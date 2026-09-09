@@ -1,9 +1,12 @@
 // Seeds (and resets) demo content for the Marlowe & Finch capsule drop demo.
 // Every document uses a fixed _id, is written with createOrReplace, and has
-// any unpublished draft discarded first — so this script is safe to re-run
-// at any time (e.g. right before a rehearsal) to snap the dataset back to a
-// known-good, fully-published state, even if a previous rehearsal left live
-// edits sitting unpublished in Studio.
+// any unpublished draft (or, for Autumn Reverie, any published copy)
+// discarded first — so this script is safe to re-run at any time (e.g. right
+// before a rehearsal) to snap the dataset back to a known-good state, even
+// if a previous rehearsal left live edits sitting unpublished in Studio, or
+// actually published Autumn Reverie while fixing it live. Every drop and
+// product seeds fully published except the Autumn Reverie drop itself,
+// which seeds as a draft on purpose — see the `draftOnly` note below.
 //
 // Product/hero imagery is downloaded from Wikimedia Commons (freely licensed,
 // no API key required) and re-uploaded to Sanity's asset pipeline, so this
@@ -415,6 +418,16 @@ const drops = [
     slug: "autumn-reverie-x-wilder-row",
     creatorCollaborator: "Wilder Row",
     launchDate: "2026-10-08T15:00:00.000Z",
+    // Two of its six products aren't ready (see the products list above), so
+    // this drop seeds as a draft — visible and editable in Studio, and in
+    // /preview, but never published to the live site. That's the whole
+    // point of the readiness check: an unready drop shouldn't be live in the
+    // first place. Open it in Studio to see the readiness warning, fix the
+    // two products, then publish it for real to complete Act 2/3. Its own
+    // products stay published (they're just not linked from anywhere on the
+    // live site while this drop is a draft) — capsuleDrop.products is a
+    // strong reference, so it can only point at published documents.
+    draftOnly: true,
     heroImage: WM("7/71/Forest_path_through_yellow_autumn_leaves_in_Tuntorp_1.jpg/1280px-Forest_path_through_yellow_autumn_leaves_in_Tuntorp_1.jpg"),
     productIds: [
       "product-av-wr-001",
@@ -506,6 +519,14 @@ async function discardDraft(id) {
   await client.delete(`drafts.${id}`);
 }
 
+async function discardPublished(id) {
+  // Mirror of discardDraft, for documents that are meant to seed as
+  // draft-only (e.g. Autumn Reverie) — clears any published copy a previous
+  // rehearsal may have left behind (say, from actually publishing it) so
+  // the reseeded state always lands back on draft-only.
+  await client.delete(id);
+}
+
 async function seedProducts(list) {
   console.log(`Seeding ${list.length} products...`);
   for (const product of list) {
@@ -564,7 +585,14 @@ async function seedEditorialArticles() {
     if (article.promoCopy !== undefined) doc.promoCopy = article.promoCopy;
     if (article.weeklyViews !== undefined) doc.weeklyViews = article.weeklyViews;
     if (article.relatedDropId) {
-      doc.relatedDrop = { _type: "reference", _ref: article.relatedDropId };
+      // Weak, matching the schema field — an article can cover a drop that
+      // isn't published yet (or no longer is) without either document
+      // blocking the other's publish state.
+      doc.relatedDrop = {
+        _type: "reference",
+        _ref: article.relatedDropId,
+        _weak: true,
+      };
     }
     if (article.relatedProductId) {
       // Weak, matching the schema field — lets this point at a nonexistent
@@ -593,9 +621,8 @@ async function seedDrops() {
       `${drop.slug}-hero.jpg`,
     );
 
-    await discardDraft(drop._id);
-    await client.createOrReplace({
-      _id: drop._id,
+    const doc = {
+      _id: drop.draftOnly ? `drafts.${drop._id}` : drop._id,
       _type: "capsuleDrop",
       title: drop.title,
       slug: { _type: "slug", current: drop.slug },
@@ -608,8 +635,19 @@ async function seedDrops() {
         _key: id,
         _ref: id,
       })),
-    });
-    console.log(`  ✓ ${drop.title} (/drops/${drop.slug})`);
+    };
+
+    if (drop.draftOnly) {
+      await discardPublished(drop._id);
+    } else {
+      await discardDraft(drop._id);
+    }
+    await client.createOrReplace(doc);
+    console.log(
+      drop.draftOnly
+        ? `  ✓ ${drop.title} (draft only — not published; open in Studio)`
+        : `  ✓ ${drop.title} (/drops/${drop.slug})`,
+    );
   }
 }
 
@@ -621,7 +659,9 @@ try {
   console.log('  - "Umber Wide-Leg Trouser" (AV-WR-005) — missing a price');
   console.log('  - "Copper Knit Vest" (AV-WR-006) — availabilityStatus: pending');
   console.log(
-    "\nOpen the Autumn Reverie drop in Studio to see the readiness warning.",
+    "\nAutumn Reverie seeds as a draft — not published, so the live site never\n" +
+      "shows its not-ready products. Open it in Studio to see the readiness\n" +
+      "warning; fixing the two products and publishing completes Act 2/3.",
   );
   console.log(
     "\nThree editorial articles carry a deliberate gap for Content Agent\n" +
