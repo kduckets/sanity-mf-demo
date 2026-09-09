@@ -180,15 +180,21 @@ CMS demo:
 
 - **`/`** — homepage: hero on the latest drop, brand statement, more drops
 - **`/drops`** — full drop catalog (published content only)
-- **`/drops/[slug]`** — a single capsule drop (editorial + linked products)
+- **`/drops/[slug]`** — a single capsule drop (editorial + linked products +
+  a "From the magazine" section for any linked articles)
+- **`/magazine`** — the full editorial catalog (lookbooks, studio visits,
+  creator content) for `editorialArticle` documents
+- **`/magazine/[slug]`** — a single article, with a link back to its capsule
+  drop when one is linked
 - **`/about`** — brand story and a small stats strip ($650M / 6 labels / etc.)
 - **`/wholesale`** — wholesale positioning and contact
 - **`/shopping-assistant`** — a chat interface contrasting a fake similarity
   search against a real Content Agent call turning free text into a GROQ
   constraint query ("Automate, deep dive," Use Case 2, for engineering)
-- **`/preview/drops`** and **`/preview/drops/[slug]`** — the same pages, but
-  reading unpublished draft content. A separate URL tree (not a cookie toggle
-  on the same URL), so it's unambiguous in the address bar which one you're on
+- **`/preview/drops`**, **`/preview/drops/[slug]`**, **`/preview/magazine`**,
+  and **`/preview/magazine/[slug]`** — the same pages, but reading unpublished
+  draft content. A separate URL tree (not a cookie toggle on the same URL), so
+  it's unambiguous in the address bar which one you're on
 - **`/studio`** — the Sanity Studio, embedded in the same app, including an
   **Overview** dashboard tab (a merchandiser-facing launch readiness board —
   see below), a **Presentation** tool tab that iframes the `/preview/*`

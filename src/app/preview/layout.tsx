@@ -20,7 +20,7 @@ export default function PreviewLayout({
           Go to live site
         </Link>
       </div>
-      <SiteHeader dropsHref="/preview/drops" />
+      <SiteHeader dropsHref="/preview/drops" magazineHref="/preview/magazine" />
       <div className="flex flex-1 flex-col">{children}</div>
       <SiteFooter />
       <VisualEditing />

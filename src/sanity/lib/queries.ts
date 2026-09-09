@@ -39,6 +39,27 @@ export interface ProductSpotlightNode {
 
 export type EditorialStoryNode = PortableTextBlock | ProductSpotlightNode
 
+export interface MagazineArticleListItem {
+  _id: string
+  title: string
+  slug: string
+  kind?: string
+  dek?: string
+  coverImage?: Image & { alt?: string }
+}
+
+export interface MagazineArticleDetail {
+  _id: string
+  title: string
+  kind?: string
+  dek?: string
+  coverImage?: Image & { alt?: string }
+  body?: PortableTextBlock[]
+  promoCopy?: string
+  relatedDrop?: { title: string; slug: string } | null
+  relatedProduct?: { name: string } | null
+}
+
 export interface CapsuleDropDetail {
   _id: string
   title: string
@@ -48,6 +69,7 @@ export interface CapsuleDropDetail {
   editorialStory?: EditorialStoryNode[]
   publishedState?: string
   products: (DropProduct | null)[]
+  articles?: MagazineArticleListItem[]
 }
 
 // Pool to pick a "Just for you" spotlight product from at render time —
@@ -138,6 +160,39 @@ export const CAPSULE_DROP_QUERY = defineQuery(`
         lastPimEventAt,
         image
       }
+    },
+    "articles": *[_type == "editorialArticle" && relatedDrop._ref == ^._id && defined(slug.current)]{
+      _id,
+      title,
+      "slug": slug.current,
+      kind,
+      dek,
+      coverImage
     }
+  }
+`)
+
+export const MAGAZINE_ARTICLES_QUERY = defineQuery(`
+  *[_type == "editorialArticle" && defined(slug.current)] | order(_createdAt desc){
+    _id,
+    title,
+    "slug": slug.current,
+    kind,
+    dek,
+    coverImage
+  }
+`)
+
+export const MAGAZINE_ARTICLE_QUERY = defineQuery(`
+  *[_type == "editorialArticle" && slug.current == $slug][0]{
+    _id,
+    title,
+    kind,
+    dek,
+    coverImage,
+    body,
+    promoCopy,
+    "relatedDrop": relatedDrop->{title, "slug": slug.current},
+    "relatedProduct": relatedProduct->{name}
   }
 `)

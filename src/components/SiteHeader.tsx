@@ -1,8 +1,15 @@
 import Link from "next/link";
 
-export function SiteHeader({ dropsHref = "/drops" }: { dropsHref?: string }) {
+export function SiteHeader({
+  dropsHref = "/drops",
+  magazineHref = "/magazine",
+}: {
+  dropsHref?: string;
+  magazineHref?: string;
+}) {
   const navLinks = [
     { href: dropsHref, label: "Drops" },
+    { href: magazineHref, label: "Magazine" },
     { href: "/about", label: "About" },
     { href: "/wholesale", label: "Wholesale" },
     { href: "/shopping-assistant", label: "Shopping assistant" },

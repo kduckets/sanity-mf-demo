@@ -6,6 +6,7 @@ import { PreviewProductList } from "@/components/drops/PreviewProductList";
 import { PreviewStoryContent } from "@/components/drops/PreviewStoryContent";
 import { ProductRow } from "@/components/drops/ProductRow";
 import { createStoryComponents } from "@/components/drops/storyComponents";
+import { ArticleCard } from "@/components/magazine/ArticleCard";
 import { urlForImage } from "@/sanity/lib/image";
 import type { CapsuleDropDetail, DropProduct, SpotlightProduct } from "@/sanity/lib/queries";
 
@@ -34,6 +35,7 @@ export function CapsuleDropView({
     (product): product is DropProduct => Boolean(product),
   );
   const resolvedSpotlight = spotlightProduct ?? null;
+  const magazineLinkPrefix = visualEditing ? "/preview/magazine" : "/magazine";
 
   return (
     <main className="flex-1">
@@ -107,6 +109,24 @@ export function CapsuleDropView({
           )}
         </aside>
       </div>
+
+      {drop.articles && drop.articles.length > 0 && (
+        <div className="mx-auto max-w-6xl border-t border-border/80 px-6 py-16">
+          <h2 className="text-sm font-medium tracking-[0.15em] text-muted uppercase">
+            From the magazine
+          </h2>
+          <ul className="mt-6 grid gap-x-8 gap-y-14 sm:grid-cols-3">
+            {drop.articles.map((article) => (
+              <li key={article._id}>
+                <ArticleCard
+                  article={article}
+                  href={`${magazineLinkPrefix}/${article.slug}`}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </main>
   );
 }

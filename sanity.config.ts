@@ -49,6 +49,10 @@ export default defineConfig({
             route: '/preview/drops/:slug',
             filter: `_type == "capsuleDrop" && slug.current == $slug`,
           },
+          {
+            route: '/preview/magazine/:slug',
+            filter: `_type == "editorialArticle" && slug.current == $slug`,
+          },
         ]),
         locations: {
           capsuleDrop: defineLocations({
@@ -60,6 +64,18 @@ export default defineConfig({
                   href: `/preview/drops/${doc?.slug}`,
                 },
                 { title: 'All drops', href: '/preview/drops' },
+              ],
+            }),
+          }),
+          editorialArticle: defineLocations({
+            select: { title: 'title', slug: 'slug.current' },
+            resolve: (doc) => ({
+              locations: [
+                {
+                  title: doc?.title || 'Untitled article',
+                  href: `/preview/magazine/${doc?.slug}`,
+                },
+                { title: 'Magazine', href: '/preview/magazine' },
               ],
             }),
           }),
