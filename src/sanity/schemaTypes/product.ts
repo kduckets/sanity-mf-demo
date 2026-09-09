@@ -40,6 +40,9 @@ export const product = defineType({
       name: 'availabilityStatus',
       title: 'Availability status',
       type: 'string',
+      description:
+        'Comes from the PIM — not something a person normally edits directly. Changing it here ' +
+        'for the demo stands in for the automated push a real stock update would trigger.',
       options: {
         list: [
           { title: 'In stock', value: 'in_stock' },
