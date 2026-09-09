@@ -24,7 +24,9 @@ export const product = defineType({
       title: 'Price (USD)',
       type: 'number',
       description:
-        'Leave empty to simulate a product the legacy PIM has not sent a price event for yet.',
+        'Comes from the PIM — not something a person normally edits directly. Leave empty to ' +
+        'simulate a product the PIM hasn\'t sent a price event for yet; editing it here for the ' +
+        'demo stands in for that automated push.',
       validation: (Rule) => Rule.positive(),
     }),
     defineField({
