@@ -23,16 +23,28 @@ interface DropOverview {
   articles: DropArticle[]
 }
 
+// This client's default perspective returns literal documents, not one
+// deduplicated logical drop — so a drop with both a published copy and a
+// draft (which happens the moment anyone so much as opens it in Studio,
+// since the readinessStatus/publishedState fields autosave to the draft on
+// view) would otherwise show up here twice. The first filter clause keeps
+// only one row per drop, preferring the draft when both exist.
+//
+// That surviving row's `_id` can still be the literal `drafts.<id>` form
+// (for a draft-only drop, or a published one with a newer draft) — but a
+// reference always stores the base id, never that prefix. The `select(...)`
+// in the correlated articles subquery strips it before comparing, so that
+// match still lands.
+//
 // Correlated subquery (`^._id`) pulls in every editorialArticle that links
 // back to this drop, without a second round trip — this is the same
 // "which editorials exist for this launch" answer a merchandiser would
 // otherwise have to cross-reference by hand across two document lists.
-//
-// For a draft-only drop (e.g. Autumn Reverie before it's published), this
-// client's default perspective keeps `_id` as the literal `drafts.<id>`
-// form — but a reference always stores the base id, never that prefix. The
-// `select(...)` strips it before comparing, so the match still lands.
-const OVERVIEW_QUERY = `*[_type == "capsuleDrop" && defined(slug.current)] | order(launchDate asc){
+const OVERVIEW_QUERY = `*[
+  _type == "capsuleDrop" &&
+  defined(slug.current) &&
+  (_id in path("drafts.**") || !defined(*[_id == "drafts." + ^._id][0]))
+] | order(launchDate asc){
   _id,
   title,
   creatorCollaborator,
