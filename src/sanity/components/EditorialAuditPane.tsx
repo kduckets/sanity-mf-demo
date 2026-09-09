@@ -118,6 +118,92 @@ const CHECKS: Check[] = [
       }))
     },
   },
+  {
+    id: 'unpublished-drop-link',
+    prompt: "Find articles promoting a drop that isn't published yet",
+    run: async (client) => {
+      // relatedDrop is weak specifically so an article can cover a drop
+      // before it's ready — so this deliberately does NOT use a
+      // drafts-perspective client for the main scan: a plain dereference
+      // only resolving published drops is exactly what "is this live yet"
+      // means. The drop's title is looked up separately (with a
+      // drafts-perspective client) purely so the explanation below can
+      // name it — the same drop is still unpublished either way.
+      const docs = await client.fetch<{ _id: string; title: string; refId: string }[]>(
+        `*[_type == "editorialArticle" && defined(relatedDrop._ref) && !defined(relatedDrop->_id)]{
+          _id, title, "refId": relatedDrop._ref
+        }`,
+      )
+      if (docs.length === 0) return []
+      const drops = await client.withConfig({ perspective: 'drafts' }).fetch<{ _id: string; title: string }[]>(
+        `*[_id in $ids]{_id, title}`,
+        { ids: docs.map((doc) => doc.refId) },
+      )
+      const dropTitleById = new Map(drops.map((drop) => [drop._id, drop.title]))
+      return docs.map((doc) => ({
+        id: `${doc._id}:unpublished-drop`,
+        docId: doc._id,
+        title: doc.title,
+        explanation: `Points readers to "${dropTitleById.get(doc.refId) ?? doc.refId}", which isn't published yet — the "Shop the drop" link won't show.`,
+        fixDescription: 'Flag for editor review',
+        applyFix: (client: Client) => client.patch(doc._id).set({ needsReview: true }).commit(),
+      }))
+    },
+  },
+  {
+    id: 'no-shoppable-link',
+    prompt: 'Find articles with no shoppable drop linked',
+    run: async (client) => {
+      const docs = await client.fetch<{ _id: string; title: string; kind?: string }[]>(
+        `*[_type == "editorialArticle" && !defined(relatedDrop)]{_id, title, kind}`,
+      )
+      return docs.map((doc) => ({
+        id: `${doc._id}:no-drop-link`,
+        docId: doc._id,
+        title: doc.title,
+        explanation: `${doc.kind ?? 'This article'} has no linked capsule drop — nothing for a reader to shop.`,
+        fixDescription: 'Flag for editor review',
+        applyFix: (client: Client) => client.patch(doc._id).set({ needsReview: true }).commit(),
+      }))
+    },
+  },
+  {
+    id: 'missing-collaborator-credit',
+    prompt: "Find creator content that doesn't credit the collaborator",
+    run: async (client) => {
+      const docs = await client.fetch<
+        { _id: string; title: string; dek?: string; bodyText: string | null; refId: string }[]
+      >(
+        `*[_type == "editorialArticle" && kind == "Creator content" && defined(relatedDrop._ref)]{
+          _id, title, dek, "bodyText": pt::text(body), "refId": relatedDrop._ref
+        }`,
+      )
+      if (docs.length === 0) return []
+      // Same reasoning as the unpublished-drop check: the collaborator name
+      // lives on the drop, which might only exist as a draft right now.
+      const drops = await client
+        .withConfig({ perspective: 'drafts' })
+        .fetch<{ _id: string; creatorCollaborator?: string }[]>(`*[_id in $ids]{_id, creatorCollaborator}`, {
+          ids: docs.map((doc) => doc.refId),
+        })
+      const collaboratorById = new Map(drops.map((drop) => [drop._id, drop.creatorCollaborator]))
+      return docs
+        .filter((doc) => {
+          const collaborator = collaboratorById.get(doc.refId)
+          if (!collaborator) return false
+          const copy = `${doc.dek ?? ''} ${doc.bodyText ?? ''}`.toLowerCase()
+          return !copy.includes(collaborator.toLowerCase())
+        })
+        .map((doc) => ({
+          id: `${doc._id}:missing-collaborator-credit`,
+          docId: doc._id,
+          title: doc.title,
+          explanation: `Creator content about the ${collaboratorById.get(doc.refId)} collaboration never says "${collaboratorById.get(doc.refId)}" by name.`,
+          fixDescription: 'Flag for editor review',
+          applyFix: (client: Client) => client.patch(doc._id).set({ needsReview: true }).commit(),
+        }))
+    },
+  },
 ]
 
 const cardStyle: React.CSSProperties = {

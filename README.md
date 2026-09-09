@@ -328,16 +328,24 @@ CMS demo:
 - **The Tailor.** Studio → **The Tailor**
   (`src/sanity/components/EditorialAuditPane.tsx`, a plain custom Structure
   Tool pane — no iframe, no comlink, so it doesn't share Presentation Tool's
-  reliability issues) is a chat-box-styled panel over five real, deterministic
-  GROQ checks against `editorialArticle` documents: missing alt text, product
-  references that don't resolve to a live SKU, stale promo copy, a genuine
-  **bulk edit** (batch-filling promo copy on every article missing one), and
-  a **gap-analysis** example (high-traffic articles — a simulated
-  `weeklyViews` field stands in for a real analytics feed — with no product
-  link for readers to shop). Each check surfaces genuine gaps in the seeded
+  reliability issues) is a chat-box-styled panel over eight real,
+  deterministic GROQ checks against `editorialArticle` documents: missing
+  alt text, product references that don't resolve to a live SKU, stale
+  promo copy, a genuine **bulk edit** (batch-filling promo copy on every
+  article missing one), a **gap-analysis** example (high-traffic articles —
+  a simulated `weeklyViews` field stands in for a real analytics feed — with
+  no product link for readers to shop), and three checks specific to how
+  Marlowe & Finch actually runs its business: an article whose linked drop
+  isn't published yet (the `relatedDrop` weak reference resolving to
+  nothing — a real "shop the drop" link that would go dead), a piece of
+  content with no linked drop at all (no shoppable tie-in, the thing this
+  brand's whole "editorial and product together" pitch is supposed to
+  avoid), and creator content that never actually names the collaborator
+  it's about (checked against the drop's `creatorCollaborator` field via
+  `pt::text()` on the body). Each check surfaces genuine gaps in the seeded
   content, lets you select which to fix, and **Apply** writes a real mutation
   via the Studio's own Sanity client — not a scripted animation. Free text in
-  the input only matches the five preset prompts (shown as chips below it);
+  the input only matches the eight preset prompts (shown as chips below it);
   anything else surfaces an honest "not wired to a live model" message rather
   than pretending to parse it. This is deliberately reliable-over-clever: no
   external LLM call to fail
@@ -535,7 +543,12 @@ one in a single Apply) and the **gap-analysis** prompt (the one high-traffic
 article with no product link for readers to shop). Check a couple of boxes
 and click **Apply**; the panel re-runs the check and the fixed items drop
 off the list. Open the affected article in **Editorial Articles** afterward
-if you want to show the write actually landed.
+if you want to show the write actually landed. Worth one more prompt if
+you want to land the "built for *this* business" point explicitly: **"Find
+articles promoting a drop that isn't published yet"** flags the Wilder Row
+piece, tying directly back to the weak-reference/readiness thread from
+Act 2 — this isn't a generic content-QA tool, it knows what "not ready to
+publish" means for a capsule-drop retailer specifically.
 
 No fixed script for the schema-as-code/GROQ half above — you know this
 codebase, drive it live.
@@ -579,7 +592,7 @@ Then hand off to Q&A.
   without live-editing anything.
 - **The audit panel is preset-prompts-only by design, for this pass** — not a
   placeholder waiting on a live LLM call. Free text stays visually typeable
-  (so the box doesn't look fake) but only matches the five preset prompts
+  (so the box doesn't look fake) but only matches the eight preset prompts
   exactly (case-insensitive); anything else shows an honest "not wired to a
   live model" message, not an error. This keeps the panel's reliability
   independent of any external API on stage. Revisit wiring up a real model
