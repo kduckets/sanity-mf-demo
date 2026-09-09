@@ -111,7 +111,7 @@ export const editorialArticle = defineType({
     defineField({
       name: 'weeklyViews',
       title: 'Weekly views (simulated)',
-      description: 'Stand-in for a real analytics feed, for Content Agent\'s popularity check.',
+      description: 'Stand-in for a real analytics feed, for The Tailor\'s popularity check.',
       type: 'number',
       readOnly: true,
       options: { canvasApp: { exclude: true } },
@@ -120,7 +120,7 @@ export const editorialArticle = defineType({
       name: 'needsReview',
       title: 'Needs review',
       type: 'boolean',
-      description: 'Set by the audit panel when it flags this article for review.',
+      description: 'Set by The Tailor when it flags this article for review.',
       initialValue: false,
       readOnly: true,
       options: { canvasApp: { exclude: true } },

@@ -88,7 +88,7 @@ re-seeding or editing them never touches the core Acts 1–3 flow:
   the result set rather than everything showing up regardless of what's
   asked.
 - **Four `editorialArticle` documents** — the magazine/lookbook/creator-content
-  layer Content Agent audits. Three each carry one deliberate gap (missing alt
+  layer The Tailor audits. Three each carry one deliberate gap (missing alt
   text, a product reference to a nonexistent SKU, and stale "Coming soon" copy
   on the already-published Golden Hour restock piece); the fourth is clean, so
   the audit panel doesn't read as flagging everything indiscriminately.
@@ -96,8 +96,9 @@ re-seeding or editing them never touches the core Acts 1–3 flow:
 ### Optional: schema manifest for Canvas / Content Agent-style tooling
 
 Sanity's dashboard-hosted tools (Canvas, the org-level Content Agent app —
-distinct from this project's own Studio-embedded "Content Agent" pane) read
-your schema from a manifest document stored **in the dataset**, not from the
+distinct from this project's own Studio-embedded "The Tailor" pane, which
+calls the same underlying Agent Actions API under a brand name of its own)
+read your schema from a manifest document stored **in the dataset**, not from the
 running Studio. This project's Studio is embedded in the Next.js app rather
 than `sanity deploy`-hosted, and nothing publishes that manifest
 automatically, so those tools will 404 with something like:
@@ -208,8 +209,8 @@ CMS demo:
   **Overview** dashboard tab (a merchandiser-facing launch readiness board —
   see below), a **Presentation** tool tab that iframes the `/preview/*`
   pages for click-to-edit and drag-and-drop reordering (see below), an
-  **Editorial Articles** document list, and a **Content Agent** custom pane
-  (Use Case 2's "Automate, deep dive" section — see below)
+  **Editorial Articles** document list, and **The Tailor**, a custom
+  Content Agent pane (Use Case 2's "Automate, deep dive" section — see below)
 
 ## How it works
 
@@ -224,7 +225,7 @@ CMS demo:
   approximation that could disagree with it), the specific blocking issues
   named per drop, and every `editorialArticle` that links back to it via a
   correlated GROQ subquery (`*[_type == "editorialArticle" &&
-  relatedDrop._ref == ^._id]`), flagging any that Content Agent marked
+  relatedDrop._ref == ^._id]`), flagging any that The Tailor marked
   `needsReview`. Drop titles and article titles are real `IntentLink`s that
   jump straight to editing that document. Live-updating via three broad
   `client.listen()` subscriptions (capsuleDrop/product/editorialArticle) —
@@ -324,7 +325,7 @@ CMS demo:
   2 to show the readiness block isn't just a red error — it's a real
   coordination point that doesn't have to route through whoever's driving
   the demo.
-- **Content Agent.** Studio → **Content Agent**
+- **The Tailor.** Studio → **The Tailor**
   (`src/sanity/components/EditorialAuditPane.tsx`, a plain custom Structure
   Tool pane — no iframe, no comlink, so it doesn't share Presentation Tool's
   reliability issues) is a chat-box-styled panel over five real, deterministic
@@ -340,14 +341,13 @@ CMS demo:
   anything else surfaces an honest "not wired to a live model" message rather
   than pretending to parse it. This is deliberately reliable-over-clever: no
   external LLM call to fail
-  live on stage. **Naming note:** this pane is labeled "Content Agent" to
-  match the deck's Use Case 2 language (Content Agent's permanent home —
-  the standalone editorial use case that originally introduced it was cut),
-  but it's a custom Structure Tool
-  pane calling Agent Actions directly — not Sanity's own hosted, org-level
-  Content Agent product (which lives in the Sanity dashboard and, as of this
-  writing, requires a studio-connect step this embedded studio doesn't yet
-  satisfy). Know the difference if asked; the underlying capability (real
+  live on stage. **Naming note:** this pane is branded "The Tailor" — a name
+  specific to Marlowe & Finch, meant to read as a bespoke tool built for this
+  brand rather than a generic vendor feature — but it's a custom Structure
+  Tool pane calling Agent Actions directly — not Sanity's own hosted,
+  org-level Content Agent product (which lives in the Sanity dashboard and,
+  as of this writing, requires a studio-connect step this embedded studio
+  doesn't yet satisfy). Know the difference if asked; the underlying capability (real
   GROQ checks, real staged fixes) is genuine either way.
 - **Shopping assistant.** `/shopping-assistant`
   (`src/app/(site)/shopping-assistant/`) is a chat interface, not a search
@@ -522,9 +522,11 @@ to show it recognizes no catalog constraint instead of hallucinating one.
 guess. Same data accuracy the room just watched in Act 2, now proven for
 AI."*
 
-**Content Agent (~1–2 min).** In Studio, open **Content Agent**. *"Same
-idea, aimed at editorial ops instead of a shopper's question — bulk edits,
-content audits, and gap analysis, through conversation."* Click a few of
+**The Tailor (~1–2 min).** In Studio, open **The Tailor**. *"Same idea,
+aimed at editorial ops instead of a shopper's question — bulk edits,
+content audits, and gap analysis, through conversation. We built this one
+specifically for Marlowe & Finch's editorial team — it's Content Agent
+under the hood, with a name and a job that's actually theirs."* Click a few of
 the example prompts — missing alt text, a broken product link, and stale
 promo copy on the Golden Hour restock piece all surface as real, staged
 findings. If time allows, show one of each flavor named in the deck: the

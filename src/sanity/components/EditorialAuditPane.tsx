@@ -208,9 +208,10 @@ export function EditorialAuditPane() {
 
   return (
     <div style={{ padding: 24, maxWidth: 720 }}>
-      <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>Content Agent</h2>
+      <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>The Tailor</h2>
       <p style={{ marginTop: 8, color: 'var(--card-muted-fg-color, #666)' }}>
-        Bulk edits, content audits, and gap analysis — in one conversation.
+        Marlowe &amp; Finch&apos;s editorial ops agent — bulk edits, content audits, and gap analysis,
+        in one conversation.
       </p>
 
       <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
