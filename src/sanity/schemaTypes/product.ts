@@ -17,6 +17,8 @@ export const product = defineType({
       name: 'sku',
       title: 'SKU',
       type: 'string',
+      description: 'From the PIM.',
+      readOnly: true,
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -55,6 +57,7 @@ export const product = defineType({
       title: 'Last PIM webhook event',
       type: 'datetime',
       description: 'Last PIM webhook event for this SKU — not a batch sync.',
+      readOnly: true,
       initialValue: () => new Date().toISOString(),
     }),
     defineField({
@@ -62,6 +65,7 @@ export const product = defineType({
       title: 'PIM event ID',
       type: 'string',
       description: 'Idempotency key for the PIM webhook event.',
+      readOnly: true,
     }),
     defineField({
       name: 'image',
