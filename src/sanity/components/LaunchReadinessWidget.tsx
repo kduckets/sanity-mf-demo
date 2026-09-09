@@ -27,13 +27,18 @@ interface DropOverview {
 // back to this drop, without a second round trip — this is the same
 // "which editorials exist for this launch" answer a merchandiser would
 // otherwise have to cross-reference by hand across two document lists.
+//
+// For a draft-only drop (e.g. Autumn Reverie before it's published), this
+// client's default perspective keeps `_id` as the literal `drafts.<id>`
+// form — but a reference always stores the base id, never that prefix. The
+// `select(...)` strips it before comparing, so the match still lands.
 const OVERVIEW_QUERY = `*[_type == "capsuleDrop" && defined(slug.current)] | order(launchDate asc){
   _id,
   title,
   creatorCollaborator,
   launchDate,
   "products": products[]->{_id, name, sku, price, availabilityStatus},
-  "articles": *[_type == "editorialArticle" && relatedDrop._ref == ^._id]{_id, title, needsReview}
+  "articles": *[_type == "editorialArticle" && relatedDrop._ref == select(^._id in path("drafts.**") => string::split(^._id, "drafts.")[1], ^._id)]{_id, title, needsReview}
 }`
 
 // These cards deliberately opt out of Studio's ambient theme — they're
