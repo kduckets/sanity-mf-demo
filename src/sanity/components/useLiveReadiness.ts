@@ -13,7 +13,13 @@ interface ProductRef {
 const READINESS_QUERY = `*[_id in $ids]{_id, name, sku, price, availabilityStatus}`
 
 export function useLiveReadiness(productRefs: ProductRef[] | undefined) {
-  const client = useClient({ apiVersion })
+  // `perspective: 'drafts'` is load-bearing here, not cosmetic: a product
+  // edit in Studio always lands on its draft first. Without this, a plain
+  // client only ever sees the published copy, so typing a price and
+  // watching this panel update live would silently show the pre-edit,
+  // still-"missing a price" state until the product was published.
+  // useClient()'s own options don't accept `perspective` — withConfig does.
+  const client = useClient({ apiVersion }).withConfig({ perspective: 'drafts' })
   const [result, setResult] = useState<ReadinessResult>({ ready: true, issues: [] })
   const [loading, setLoading] = useState(true)
 

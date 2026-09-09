@@ -23,34 +23,25 @@ interface DropOverview {
   articles: DropArticle[]
 }
 
-// This client's default perspective returns literal documents, not one
-// deduplicated logical drop — so a drop with both a published copy and a
-// draft (which happens the moment anyone so much as opens it in Studio,
-// since the readinessStatus/publishedState fields autosave to the draft on
-// view) would otherwise show up here twice. The first filter clause keeps
-// only one row per drop, preferring the draft when both exist.
-//
-// That surviving row's `_id` can still be the literal `drafts.<id>` form
-// (for a draft-only drop, or a published one with a newer draft) — but a
-// reference always stores the base id, never that prefix. The `select(...)`
-// in the correlated articles subquery strips it before comparing, so that
-// match still lands.
-//
 // Correlated subquery (`^._id`) pulls in every editorialArticle that links
 // back to this drop, without a second round trip — this is the same
 // "which editorials exist for this launch" answer a merchandiser would
 // otherwise have to cross-reference by hand across two document lists.
-const OVERVIEW_QUERY = `*[
-  _type == "capsuleDrop" &&
-  defined(slug.current) &&
-  (_id in path("drafts.**") || !defined(*[_id == "drafts." + ^._id][0]))
-] | order(launchDate asc){
+//
+// This relies on the client below using `perspective: 'drafts'` — without
+// it, a drop with both a published copy and a draft (which happens the
+// moment anyone so much as opens it in Studio) shows up as two separate
+// rows with a literal `drafts.<id>` id, silently breaking both this
+// correlation (a reference always stores the base id, never that prefix)
+// and every product's price/status, which would otherwise read as
+// whatever was last *published*, not the current draft.
+const OVERVIEW_QUERY = `*[_type == "capsuleDrop" && defined(slug.current)] | order(launchDate asc){
   _id,
   title,
   creatorCollaborator,
   launchDate,
   "products": products[]->{_id, name, sku, price, availabilityStatus},
-  "articles": *[_type == "editorialArticle" && relatedDrop._ref == select(^._id in path("drafts.**") => string::split(^._id, "drafts.")[1], ^._id)]{_id, title, needsReview}
+  "articles": *[_type == "editorialArticle" && relatedDrop._ref == ^._id]{_id, title, needsReview}
 }`
 
 // These cards deliberately opt out of Studio's ambient theme — they're
@@ -112,7 +103,8 @@ function formatLaunchDate(iso?: string) {
 }
 
 export function LaunchReadinessWidget() {
-  const client = useClient({ apiVersion })
+  // useClient()'s own options don't accept `perspective` — withConfig does.
+  const client = useClient({ apiVersion }).withConfig({ perspective: 'drafts' })
   const [drops, setDrops] = useState<DropOverview[] | null>(null)
 
   useEffect(() => {

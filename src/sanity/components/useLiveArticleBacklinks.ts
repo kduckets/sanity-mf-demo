@@ -22,7 +22,11 @@ const BACKLINKS_QUERY = `*[_type == "editorialArticle" && relatedDrop._ref == $i
 // from what articles actually link here), this reads the live answer
 // straight from the one place the relationship is stored.
 export function useLiveArticleBacklinks(dropId: string | undefined) {
-  const client = useClient({ apiVersion })
+  // `perspective: 'drafts'` so an article's title/flag reflects an
+  // in-progress edit here too, not just its last-published state — see the
+  // matching comment in useLiveReadiness.ts for why this matters.
+  // useClient()'s own options don't accept `perspective` — withConfig does.
+  const client = useClient({ apiVersion }).withConfig({ perspective: 'drafts' })
   const [articles, setArticles] = useState<ArticleBacklink[]>([])
   const [loading, setLoading] = useState(true)
 
