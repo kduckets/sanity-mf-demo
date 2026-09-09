@@ -82,7 +82,7 @@ export const editorialArticle = defineType({
     defineField({
       name: 'promoCopy',
       title: 'Promo copy',
-      description: 'Short live-status line, e.g. shown as a badge — the kind of copy that goes stale.',
+      description: 'Short status line, e.g. a badge — the kind of copy that goes stale.',
       type: 'string',
       options: {
         canvasApp: {
@@ -96,10 +96,7 @@ export const editorialArticle = defineType({
       type: 'reference',
       to: [{ type: 'capsuleDrop' }],
       weak: true,
-      description:
-        'Weak reference — an article can cover a drop before that drop is ready to publish. If the ' +
-        'drop has no published version yet (or is later removed), this resolves to nothing on the ' +
-        'live site rather than blocking either document from publishing independently.',
+      description: 'Weak reference — an article can cover a drop that isn\'t published yet.',
       options: { canvasApp: { exclude: true } },
     }),
     defineField({
@@ -108,15 +105,13 @@ export const editorialArticle = defineType({
       type: 'reference',
       to: [{ type: 'product' }],
       weak: true,
-      description:
-        'Weak reference, matching how a real link goes stale — if the product is renamed or removed, this can point at nothing. Deliberately broken on one seeded article; the audit checks for this.',
+      description: 'Weak reference — can go stale. Deliberately broken on one article; the audit checks for this.',
       options: { canvasApp: { exclude: true } },
     }),
     defineField({
       name: 'weeklyViews',
       title: 'Weekly views (simulated)',
-      description:
-        'Stand-in for a real analytics feed — lets Content Agent demo a popularity-based check without wiring up actual analytics.',
+      description: 'Stand-in for a real analytics feed, for Content Agent\'s popularity check.',
       type: 'number',
       readOnly: true,
       options: { canvasApp: { exclude: true } },
@@ -125,7 +120,7 @@ export const editorialArticle = defineType({
       name: 'needsReview',
       title: 'Needs review',
       type: 'boolean',
-      description: 'Set by the editorial audit panel when it flags this article for a human to look at.',
+      description: 'Set by the audit panel when it flags this article for review.',
       initialValue: false,
       readOnly: true,
       options: { canvasApp: { exclude: true } },

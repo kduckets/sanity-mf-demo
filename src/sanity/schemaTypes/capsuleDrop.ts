@@ -52,8 +52,7 @@ export const capsuleDrop = defineType({
     defineField({
       name: 'editorialStory',
       title: 'Editorial story',
-      description:
-        'Insert a "Just for you" block anywhere via the + menu, then drag it above or below paragraphs to reposition it.',
+      description: 'Insert a "Just for you" block via the + menu; drag to reposition.',
       type: 'array',
       of: [
         defineArrayMember({ type: 'block' }),
@@ -71,10 +70,7 @@ export const capsuleDrop = defineType({
     defineField({
       name: 'articles',
       title: 'Articles',
-      description:
-        'The other direction of the editorialArticle → capsuleDrop link: any article whose ' +
-        '"Related capsule drop" points here. Computed live from that reference, not a separate ' +
-        'list to maintain — set the link on the article, not here.',
+      description: 'Live-computed from articles that link here. Set the link on the article, not here.',
       type: 'string',
       readOnly: true,
       components: { input: ArticlesBacklinkInput },
