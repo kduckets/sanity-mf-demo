@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { set, type StringInputProps, useFormValue } from 'sanity'
+import { IntentLink } from 'sanity/router'
 
 import { useLiveReadiness } from './useLiveReadiness'
 
@@ -54,7 +55,16 @@ export function ReadinessStatusInput(props: StringInputProps) {
       {!ready && (
         <ul style={{ margin: '8px 0 0', paddingLeft: 18 }}>
           {issues.map((issue, i) => (
-            <li key={`${issue.productId}-${issue.field}-${i}`}>{issue.message}</li>
+            <li key={`${issue.productId}-${issue.field}-${i}`}>
+              <IntentLink
+                intent="edit"
+                params={{ id: issue.productId, type: 'product' }}
+                style={{ color: 'inherit', textDecoration: 'none' }}
+              >
+                <span style={{ textDecoration: 'underline' }}>&quot;{issue.productName}&quot;</span>
+              </IntentLink>{' '}
+              {issue.detail}
+            </li>
           ))}
         </ul>
       )}

@@ -11,7 +11,12 @@ export interface ReadinessIssue {
   productName: string
   sku?: string
   field: 'availabilityStatus' | 'price'
+  // Full sentence, for contexts that can only render plain text (e.g. the
+  // document-level validation error). `detail` is the same sentence minus
+  // the product name, so UI that can link the name renders
+  // <Link>{productName}</Link> {detail} instead.
   message: string
+  detail: string
 }
 
 export interface ReadinessResult {
@@ -28,22 +33,26 @@ export function computeReadiness(products: ReadinessProduct[]): ReadinessResult 
     const label = product.name || product.sku || 'Untitled product'
 
     if (product.availabilityStatus && BLOCKING_STATUSES.has(product.availabilityStatus)) {
+      const detail = `is marked "${product.availabilityStatus}" — not confirmed ready for launch.`
       issues.push({
         productId: product._id,
         productName: label,
         sku: product.sku,
         field: 'availabilityStatus',
-        message: `"${label}" is marked "${product.availabilityStatus}" — not confirmed ready for launch.`,
+        message: `"${label}" ${detail}`,
+        detail,
       })
     }
 
     if (product.price === undefined || product.price === null) {
+      const detail = 'is missing a price.'
       issues.push({
         productId: product._id,
         productName: label,
         sku: product.sku,
         field: 'price',
-        message: `"${label}" is missing a price.`,
+        message: `"${label}" ${detail}`,
+        detail,
       })
     }
   }

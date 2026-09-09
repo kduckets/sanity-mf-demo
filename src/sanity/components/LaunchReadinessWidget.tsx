@@ -188,7 +188,16 @@ export function LaunchReadinessWidget() {
                   ) : (
                     <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: NOT_READY.badgeFg, lineHeight: 1.6 }}>
                       {readiness.issues.map((issue, i) => (
-                        <li key={`${issue.productId}-${issue.field}-${i}`}>{issue.message}</li>
+                        <li key={`${issue.productId}-${issue.field}-${i}`}>
+                          <IntentLink
+                            intent="edit"
+                            params={{ id: issue.productId, type: 'product' }}
+                            style={{ color: 'inherit', textDecoration: 'none' }}
+                          >
+                            <span style={{ textDecoration: 'underline' }}>&quot;{issue.productName}&quot;</span>
+                          </IntentLink>{' '}
+                          {issue.detail}
+                        </li>
                       ))}
                     </ul>
                   )}
