@@ -60,10 +60,37 @@ const OVERVIEW_QUERY = `*[
 // and friends) here would be wrong, not just inconsistent — those resolve
 // to a *light* color in dark Studio, meant to sit on a *dark* card, and
 // would go near-invisible against this widget's light background.
-const READY = { border: '#bfe3cd', bg: '#f3faf6', badgeFg: '#1f6f43', badgeBg: '#e2f3e8' }
-const NOT_READY = { border: '#f0c9c3', bg: '#fdf3f2', badgeFg: '#8a2620', badgeBg: '#fbe2df' }
+const READY = {
+  border: '#bfe3cd',
+  bg: 'linear-gradient(160deg, #f6fbf8 0%, #e9f6ef 100%)',
+  badgeFg: '#1f6f43',
+  badgeBg: '#e2f3e8',
+  accent: '#3aa76d',
+}
+const NOT_READY = {
+  border: '#f0c9c3',
+  bg: 'linear-gradient(160deg, #fef6f5 0%, #fbe6e3 100%)',
+  badgeFg: '#8a2620',
+  badgeBg: '#fbe2df',
+  accent: '#d1453b',
+}
 const INK = '#1c1a17'
 const MUTED = '#6b6459'
+
+// Inline styles can't express :hover or transitions, and this widget
+// intentionally skips Studio's theme system (see above) — so the one bit
+// of real CSS it needs (a smooth lift on hover, and a smooth color morph
+// when a card flips from not-ready to ready live) gets a scoped <style>
+// tag instead of a CSS module, to keep this a single drop-in component.
+const CARD_TRANSITIONS = `
+  .mf-lrw-card {
+    transition: background 500ms ease, border-color 500ms ease, box-shadow 200ms ease, transform 200ms ease;
+  }
+  .mf-lrw-card:hover {
+    box-shadow: 0 8px 20px rgba(28, 26, 23, 0.1);
+    transform: translateY(-1px);
+  }
+`
 
 const linkStyle: React.CSSProperties = {
   color: INK,
@@ -128,27 +155,66 @@ export function LaunchReadinessWidget() {
     0,
   )
 
+  const readyPct = drops.length === 0 ? 0 : (readyCount / drops.length) * 360
+
   return (
     <DashboardWidgetContainer header="Launch readiness">
+      <style>{CARD_TRANSITIONS}</style>
       <div style={{ padding: '4px 16px 16px' }}>
         <div
           style={{
-            marginBottom: 14,
-            fontSize: 13,
-            color: 'var(--card-muted-fg-color, #666)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            marginBottom: 18,
+            padding: '12px 14px',
+            borderRadius: 12,
+            background: 'linear-gradient(135deg, #faf8f4 0%, #f2ede3 100%)',
+            border: '1px solid #e7ded0',
           }}
         >
-          <strong style={{ color: 'var(--card-fg-color, #1a1a1a)' }}>
-            {readyCount} of {drops.length}
-          </strong>{' '}
-          drops ready to publish
-          {reviewCount > 0 && (
-            <>
-              {' · '}
-              <strong style={{ color: 'var(--card-fg-color, #1a1a1a)' }}>{reviewCount}</strong> article
-              {reviewCount === 1 ? '' : 's'} flagged for review
-            </>
-          )}
+          <div
+            style={{
+              flexShrink: 0,
+              width: 52,
+              height: 52,
+              borderRadius: '50%',
+              background: `conic-gradient(${READY.accent} ${readyPct}deg, #f0d9d5 0deg)`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: 'inset 0 0 0 1px rgba(28, 26, 23, 0.06)',
+            }}
+          >
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                background: '#fffdfa',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 13,
+                fontWeight: 700,
+                color: INK,
+              }}
+            >
+              {readyCount}/{drops.length}
+            </div>
+          </div>
+
+          <div style={{ fontSize: 13, color: MUTED }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: INK }}>
+              {readyCount} of {drops.length} drops ready to publish
+            </div>
+            {reviewCount > 0 && (
+              <div style={{ marginTop: 2 }}>
+                <strong style={{ color: NOT_READY.badgeFg }}>{reviewCount}</strong> article
+                {reviewCount === 1 ? '' : 's'} flagged for review
+              </div>
+            )}
+          </div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -157,30 +223,49 @@ export function LaunchReadinessWidget() {
             return (
               <div
                 key={drop._id}
+                className="mf-lrw-card"
                 style={{
+                  position: 'relative',
                   border: `1px solid ${tone.border}`,
                   background: tone.bg,
-                  borderRadius: 10,
-                  padding: '14px 16px',
+                  borderRadius: 12,
+                  padding: '14px 16px 14px 20px',
                   boxShadow: '0 1px 2px rgba(28, 26, 23, 0.04)',
+                  overflow: 'hidden',
                 }}
               >
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    width: 4,
+                    background: tone.accent,
+                    transition: 'background 500ms ease',
+                  }}
+                />
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
                   <IntentLink intent="edit" params={{ id: drop._id, type: 'capsuleDrop' }} style={linkStyle}>
                     <span style={{ fontWeight: 600, fontSize: 15 }}>{drop.title}</span>
                   </IntentLink>
                   <span
                     style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
                       fontSize: 11,
                       fontWeight: 700,
-                      padding: '3px 9px',
+                      padding: '3px 10px',
                       borderRadius: 999,
                       color: tone.badgeFg,
                       background: tone.badgeBg,
+                      boxShadow: `inset 0 0 0 1px ${tone.border}`,
                       whiteSpace: 'nowrap',
+                      transition: 'background 500ms ease, color 500ms ease',
                     }}
                   >
-                    {readiness.ready ? 'READY' : `${readiness.issues.length} ISSUE${readiness.issues.length === 1 ? '' : 'S'}`}
+                    {readiness.ready ? '✓ READY' : `⚠ ${readiness.issues.length} ISSUE${readiness.issues.length === 1 ? '' : 'S'}`}
                   </span>
                 </div>
 
